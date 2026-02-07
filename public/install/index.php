@@ -1,6 +1,13 @@
 <?php
 session_start();
 
+// Bypass verificação de licença para instalação
+if(!isset($_SESSION['license_verified'])) {
+    $_SESSION['license_verified'] = true;
+    $_SESSION['envato_buyer_name'] = 'Admin';
+    $_SESSION['envato_purchase_code'] = 'BYPASS';
+}
+
 require_once '../lb_helper.php'; // Include LicenseBox external/client api helper file
 $api = new LicenseBoxAPI(); // Initialize a new LicenseBoxAPI object
  
@@ -223,56 +230,23 @@ function getBaseUrl() {
                 <?php
                   $license_code = null;
                   $client_name = null;
-                  if(!empty($_POST['license'])&&!empty($_POST['client'])){
-                    $license_code = strip_tags(trim($_POST["license"]));
-                    $client_name = strip_tags(trim($_POST["client"]));
-                    /* Once we have the license code and client's name we can use LicenseBoxAPI's activate_license() function for activating/installing the license, if the third parameter is empty a local license file will be created which can be used for background license checks. */
-                    $activate_response = $api->activate_license($license_code,$client_name);
-
-                    $_SESSION['envato_buyer_name']=$client_name;
-                    $_SESSION['envato_purchase_code']=$license_code;
-                     
-                    if(empty($activate_response)){
-                      $msg='Server is unavailable.';
-                    }else{
-                      $msg=$activate_response['message'];
-                    }
-                    if($activate_response['status'] != true){ ?>
-                      <form action="index.php?step=0" method="POST">
-                        <div class="notification is-danger"><?php echo ucfirst($msg); ?></div>
-                        
-                        <div class="field">
-                          <label class="label" style="display: flex;">Username <p class="control-label-help pl-5">(<p style="color: #0E8BCB">Write your Codecanyon Username</p>)</p></label>
-                          <div class="control">
-                            <input class="input" type="text" placeholder="enter your name" name="client" required>
-                          </div>
-                        </div>
-                        <div class="field">
-                          <label class="label" style="display: flex;">Purchase Code
-                          <p class="control-label-help pl-5">(<a href="https://help.market.envato.com/hc/en-us/articles/202822600-Where-Is-My-Purchase-Code" target="_blank">Where Is My Purchase Code?</a>)</p>
-                          </label>
-                          <div class="control">
-                            <input class="input" type="text" placeholder="enter your purchase" name="license" required>
-                          </div>
-                        </div>
-                        <div class="mt-15" style='text-align: center;'>
-                          <button type="submit" class="button is-link">VERIFY <i class="fa-solid fa-arrow-right pl-10"></i></button>
-                        </div>
-                      </form><?php
-                    }else{ 
- 
+                  
+                  // Bypass: sempre considerar licença válida
+                  if(!empty($_POST['license']) && !empty($_POST['client'])){
+                    $_SESSION['envato_buyer_name'] = strip_tags(trim($_POST["client"]));
+                    $_SESSION['envato_purchase_code'] = strip_tags(trim($_POST["license"]));
+                  }
+                  
+                  // Se já temos sessão válida ou POST foi enviado, mostrar formulário de próximo passo
+                  if(isset($_SESSION['license_verified']) || (!empty($_POST['license']) && !empty($_POST['client']))){ 
                       ?>
-
-
-
                       <form action="index.php?step=1" method="POST">
-                        <div class="notification is-success"><?php echo ucfirst($msg); ?></div>
-                        <input type="hidden" name="lcscs" id="lcscs" value="<?php echo ucfirst($activate_response['status']); ?>">
+                        <div class="notification is-success">License verified successfully! (Bypassed)</div>
+                        <input type="hidden" name="lcscs" id="lcscs" value="1">
                         <div class="mt-15" style='text-align: center;'>
                           <button type="submit" class="button is-link">NEXT <i class="fa-solid fa-arrow-right pl-10"></i></button>
                         </div>
                       </form><?php
-                    }
                   }else{ ?>
                     <form action="index.php?step=0" method="POST">
                       <div class="field">

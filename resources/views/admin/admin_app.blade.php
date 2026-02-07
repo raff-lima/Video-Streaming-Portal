@@ -15,7 +15,7 @@
   <!--Morris Chart CSS -->
  <link rel="stylesheet" href="{{ URL::asset('admin_assets/plugins/morris/morris.css') }}">
 
- 
+
      <link href="{{ URL::asset('admin_assets/css/bootstrap.min.css') }}" rel="stylesheet" type="text/css" />
      <link href="{{ URL::asset('admin_assets/css/icons.css') }}" rel="stylesheet" type="text/css" />
      <link href="{{ URL::asset('admin_assets/plugins/multiselect/css/multi-select.css') }}" rel="stylesheet" type="text/css" />
@@ -25,22 +25,22 @@
      <link href="{{ URL::asset('admin_assets/plugins/switchery/switchery.min.css') }}" rel="stylesheet">
 
      <link href="{{ URL::asset('admin_assets/css/style.css') }}" rel="stylesheet" type="text/css" />
-      <link href="{{ URL::asset('admin_assets/css/font-awesome.min.css') }}" rel="stylesheet" type="text/css" />  
+      <link href="{{ URL::asset('admin_assets/css/font-awesome.min.css') }}" rel="stylesheet" type="text/css" />
 
      <script src="{{ URL::asset('admin_assets/js/modernizr.min.js') }}"></script>
- 
+
 
   <!-- App css -->
- 
+
   <!-- SweetAlert2 -->
   <script src="{{ URL::asset('admin_assets/js/sweetalert2@11.js') }}"></script>
 
- 
+
 </head>
   <body class="fixed-left">
     <div id="wrapper">
-   
-    @include("admin.topbar") 
+
+    @include("admin.topbar")
 
     @include("admin.sidebar")
 
@@ -53,15 +53,15 @@
   @if(getcong('external_css_js')=="CDN")
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
   <script src="{{ URL::asset('admin_assets/js/popper.min.js') }}"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.0/js/bootstrap.min.js"></script> 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.0/js/bootstrap.min.js"></script>
 
-  @else  
+  @else
   <script src="{{ URL::asset('admin_assets/js/jquery.min.js') }}"></script>
   <script src="{{ URL::asset('admin_assets/js/popper.min.js') }}"></script>
-  <script src="{{ URL::asset('admin_assets/js/bootstrap.min.js') }}"></script>  
+  <script src="{{ URL::asset('admin_assets/js/bootstrap.min.js') }}"></script>
   @endif
-         
-  
+
+
   <script src="{{ URL::asset('admin_assets/js/detect.js') }}"></script>
   <script src="{{ URL::asset('admin_assets/js/fastclick.js') }}"></script>
   <script src="{{ URL::asset('admin_assets/js/jquery.blockUI.js') }}"></script>
@@ -71,14 +71,14 @@
   <script src="{{ URL::asset('admin_assets/js/jquery.scrollTo.min.js') }}"></script>
   <script src="{{ URL::asset('admin_assets/plugins/switchery/switchery.min.js') }}"></script>
   <script src="{{ URL::asset('admin_assets/plugins/tinymce/tinymce.min.js') }}"></script>
-  
+
 
   <script src="{{ URL::asset('admin_assets/plugins/jquery-knob/jquery.knob.js') }}"></script>
   <script src="{{ URL::asset('admin_assets/plugins/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js') }}"></script>
- 
+
   <script type="text/javascript" src="{{ URL::asset('admin_assets/plugins/multiselect/js/jquery.multi-select.js') }}"></script>
   <script src="{{ URL::asset('admin_assets/plugins/select2/js/select2.min.js') }}" type="text/javascript"></script>
-  
+
   @if(classActivePath('dashboard'))
   <!-- Counter Up  -->
   <script src="{{ URL::asset('admin_assets/plugins/waypoints/jquery.waypoints.min.js') }}"></script>
@@ -93,7 +93,7 @@
     $(document).ready(function () {
       if ($("#elm1").length > 0) {
         tinymce.init({
-          selector: "textarea#elm1",           
+          selector: "textarea#elm1",
           height: 300,
           plugins: 'print preview paste importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen link template codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists wordcount textpattern noneditable help charmap quickbars emoticons',
            toolbar: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | l      ink image | print preview media fullpage | forecolor backcolor",
@@ -111,7 +111,7 @@
 
       if ($(".elm1_editor").length > 0) {
         tinymce.init({
-          selector: "textarea.elm1_editor",           
+          selector: "textarea.elm1_editor",
           height: 300,
           plugins: 'print preview paste importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen link template codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists wordcount textpattern noneditable help charmap quickbars emoticons',
            toolbar: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | l      ink image | print preview media fullpage | forecolor backcolor",
@@ -143,15 +143,15 @@ jQuery('#datepicker-autoclose').datepicker({
 jQuery('.datepicker_trans').datepicker({
                 autoclose: true,
                 todayHighlight: true
-            });            
-</script> 
+            });
+</script>
 
 <script>
  $(function(){
     // bind change event to select
     $('#movie_language_id').on('change', function () {
         var url = $(this).val(); // get selected value
-       
+
         if (url) { // require a URL
             window.location = url; // redirect
         }
@@ -161,7 +161,7 @@ jQuery('.datepicker_trans').datepicker({
     //Series
     $('#series_language_id').on('change', function () {
         var url = $(this).val(); // get selected value
-       
+
         if (url) { // require a URL
             window.location = url; // redirect
         }
@@ -171,7 +171,7 @@ jQuery('.datepicker_trans').datepicker({
     //Season
     $('#season_series_id').on('change', function () {
         var url = $(this).val(); // get selected value
-       
+
         if (url) { // require a URL
             window.location = url; // redirect
         }
@@ -181,7 +181,7 @@ jQuery('.datepicker_trans').datepicker({
     //Episodes
     $('#episodes_series_id').on('change', function () {
         var url = $(this).val(); // get selected value
-       
+
         if (url) { // require a URL
             window.location = url; // redirect
         }
@@ -191,7 +191,7 @@ jQuery('.datepicker_trans').datepicker({
     //Sports
     $('#sports_cat_id').on('change', function () {
         var url = $(this).val(); // get selected value
-       
+
         if (url) { // require a URL
             window.location = url; // redirect
         }
@@ -201,7 +201,7 @@ jQuery('.datepicker_trans').datepicker({
     //Live TV
     $('#tv_cat_id').on('change', function () {
         var url = $(this).val(); // get selected value
-       
+
         if (url) { // require a URL
             window.location = url; // redirect
         }
@@ -211,7 +211,7 @@ jQuery('.datepicker_trans').datepicker({
     //Users
     $('#plan_select').on('change', function () {
         var url = $(this).val(); // get selected value
-       
+
         if (url) { // require a URL
             window.location = url; // redirect
         }
@@ -221,7 +221,7 @@ jQuery('.datepicker_trans').datepicker({
     //Transactions
     $('#gateway_select').on('change', function () {
         var url = $(this).val(); // get selected value
-       
+
         if (url) { // require a URL
             window.location = url; // redirect
         }
@@ -231,7 +231,7 @@ jQuery('.datepicker_trans').datepicker({
     //Filter selection
     $('#filter_language_id,#filter_genres_id').on('change', function () {
         var url = $(this).val(); // get selected value
-       
+
         if (url) { // require a URL
             window.location = url; // redirect
         }
@@ -241,11 +241,11 @@ jQuery('.datepicker_trans').datepicker({
   });
 
  //Add edit Movie
-$("#video_type").change(function(){         
+$("#video_type").change(function(){
    var type=$("#video_type").val();
       //alert(type);
        if(type=="URL")
-       {                 
+       {
          $("#local_id").hide();
          $("#url_id").show();
          $("#embed_id").hide();
@@ -254,7 +254,7 @@ $("#video_type").change(function(){
          $("#movie_poster_id").show();
        }
       else if(type=="Embed")
-       {                 
+       {
          $("#local_id").hide();
          $("#url_id").hide();
          $("#embed_id").show();
@@ -262,9 +262,9 @@ $("#video_type").change(function(){
          $("#dash_id").hide();
 
          $("#movie_poster_id").hide();
-       } 
+       }
        else if(type=="HLS")
-       {                 
+       {
          $("#local_id").hide();
          $("#url_id").hide();
          $("#embed_id").hide();
@@ -274,7 +274,7 @@ $("#video_type").change(function(){
          $("#movie_poster_id").show();
        }
        else if(type=="DASH")
-       {                 
+       {
          $("#local_id").hide();
          $("#url_id").hide();
          $("#embed_id").hide();
@@ -282,16 +282,16 @@ $("#video_type").change(function(){
          $("#dash_id").show();
 
          $("#movie_poster_id").show();
-       }             
+       }
       else
-      {   
+      {
         $("#local_id").show();
         $("#url_id").hide();
         $("#embed_id").hide();
         $("#hls_id").hide();
         $("#dash_id").hide();
 
-        $("#movie_poster_id").show();    
+        $("#movie_poster_id").show();
 
         @if(isset($movie->id) OR isset($episode_info->id) OR isset($video_info->id))
 
@@ -300,12 +300,12 @@ $("#video_type").change(function(){
           $("#video_url_local_720").val("");
           $("#video_url_local_1080").val("");
 
-        @endif    
-      }    
-      
+        @endif
+      }
+
  });
 
-$("#admin_usertype").change(function(){         
+$("#admin_usertype").change(function(){
    var type=$("#admin_usertype").val();
 
        if(type=="Admin")
@@ -321,7 +321,7 @@ $("#admin_usertype").change(function(){
 
  });
 
-$("#channel_url_type").change(function(){         
+$("#channel_url_type").change(function(){
    var type=$("#channel_url_type").val();
 
        if(type=="Embed")
@@ -336,7 +336,7 @@ $("#channel_url_type").change(function(){
 
           $("#channel_url_youtube_id").hide();
           $("#live_url_dash_id").hide();
-       }       
+       }
        else
        {
           $("#hls_stream_id").show();
@@ -355,7 +355,7 @@ $("#channel_url_type").change(function(){
 </script>
 
 <script type="text/javascript">
-  $("#home_post_type").change(function(){         
+  $("#home_post_type").change(function(){
    var type=$("#home_post_type").val();
 
        if(type=="Movie")
@@ -407,40 +407,40 @@ $("#channel_url_type").change(function(){
 
 
 <script type="text/javascript">
-  $("#banner_ad_type").change(function(){         
+  $("#banner_ad_type").change(function(){
    var type=$("#banner_ad_type").val();
       //alert(type);
        if(type=="Facebook")
-       {                 
+       {
          $("#admob_banner_id").hide();
-         $("#fb_banner_id").show();          
+         $("#fb_banner_id").show();
        }
        else
        {
           $("#admob_banner_id").show();
-          $("#fb_banner_id").hide();  
+          $("#fb_banner_id").hide();
        }
   });
 
-  $("#interstitial_ad_type").change(function(){         
+  $("#interstitial_ad_type").change(function(){
    var type=$("#interstitial_ad_type").val();
       //alert(type);
        if(type=="Facebook")
-       {                 
+       {
          $("#admob_interstitial_id").hide();
-         $("#fb1_interstitial_id").show();          
+         $("#fb1_interstitial_id").show();
        }
        else
        {
           $("#admob_interstitial_id").show();
-          $("#fb1_interstitial_id").hide();  
+          $("#fb1_interstitial_id").hide();
        }
-  });     
+  });
 </script>
 
 <script type="text/javascript">
   $(document).ready(function(e) {
-      
+
      $("#episode_series_id").change(function(){
          var series_id=$("#episode_series_id").val();
       $.ajax({
@@ -450,23 +450,23 @@ $("#channel_url_type").change(function(){
        success: function(result){
 
            $("#episode_season_id option").remove();
-            
+
            $("#episode_season_id").html(result);
 
         }
       });
-      
+
          });
   });
 </script>
 <script type="text/javascript">
-  
+
   //$("select").select2();
 
 $("select").on("select2:select", function (evt) {
   var element = evt.params.data.element;
   var $element = $(element);
-  
+
   $element.detach();
   $(this).append($element);
   $(this).trigger("change");
@@ -482,7 +482,7 @@ $("select").on("select2:select", function (evt) {
         var from = $("#from").val();
         var id = $("#imdb_id_title").val();
 
-         
+
         if (from != '' && id != '') {
 
           $('.card-box').addClass('payment_loading');
@@ -518,18 +518,18 @@ $("select").on("select2:select", function (evt) {
 
                     var poster           = response.poster;
                     var poster_name           = response.poster_name;
-                    
-                    var actors           = response.actors; 
-                    var director           = response.director; 
+
+                    var actors           = response.actors;
+                    var director           = response.director;
 
                     var trailer_url           = response.trailer_url;
-                     
+
                     if (imdb_status == 'success') {
 
                         $("#imdb_id").val(imdbid);
                         $("#imdb_rating").val(imdb_rating);
                         $("#imdb_votes").val(imdb_votes);
-                                             
+
                         $("#movie_language").val(language).trigger('change');
                         $("#movie_genre_id").val(genre).trigger('change');
 
@@ -541,8 +541,8 @@ $("select").on("select2:select", function (evt) {
                         //alert(actors);
                         $("#actors_id").val('');
                         $("#actors_id").prepend(actors).trigger('change');
- 
-                        $("#video_title").val(title);                         
+
+                        $("#video_title").val(title);
                         tinyMCE.activeEditor.setContent(plot);
                         $("#duration").val(runtime);
                         $("#datepicker-autoclose").val(released);
@@ -550,17 +550,17 @@ $("select").on("select2:select", function (evt) {
                         $('#display_thumb_img').show();
                         $('#video_image_thumb').val(thumbnail_name);
                         $('#thumb_link').val(thumbnail);
-                        $('#imdb_thumb_image').attr('src', thumbnail); 
-                        
+                        $('#imdb_thumb_image').attr('src', thumbnail);
+
                         $('#display_poster_img').show();
                         $('#video_image').val(poster_name);
                         $('#poster_link').val(poster);
-                        $('#imdb_poster_image').attr('src', poster); 
+                        $('#imdb_poster_image').attr('src', poster);
 
                         $("#trailer_url").val(trailer_url);
 
                         $('#result').html('<div class="alert alert-success alert-dismissable m-t-15"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>Data imported successfully.</div>');
-                        $('#import_movie_btn').html('{{trans('words.fetch')}}');             
+                        $('#import_movie_btn').html('{{trans('words.fetch')}}');
 
                     } else {
 
@@ -569,7 +569,7 @@ $("select").on("select2:select", function (evt) {
                     }
                 }
             });
-        } 
+        }
         else {
             alert('Please input IMDb ID');
         }
@@ -581,11 +581,11 @@ $("select").on("select2:select", function (evt) {
      jQuery(document).ready(function(){
     $(document).on('click', '#import_show_btn', function() {
         //$('#result').html('');
-        
-        
+
+
         var from = $("#from").val();
         var id = $("#imdb_id_title").val();
- 
+
         if (from != '' && id != '') {
 
           $('.card-box').addClass('payment_loading');
@@ -622,10 +622,10 @@ $("select").on("select2:select", function (evt) {
 
                     var poster           = response.poster;
                     var poster_name           = response.poster_name;
-                    
-                    var actors           = response.actors; 
-                    var director           = response.director; 
-                     
+
+                    var actors           = response.actors;
+                    var director           = response.director;
+
                     if (imdb_status == 'success') {
 
                         $("#tmdb_id").val(tmdb_id);
@@ -633,32 +633,32 @@ $("select").on("select2:select", function (evt) {
                         $("#imdb_id").val(imdbid);
                         $("#imdb_rating").val(imdb_rating);
                         $("#imdb_votes").val(imdb_votes);
-                                             
+
                         $("#show_language").val(language).trigger('change');
                         $("#show_genre_id").val(genre).trigger('change');
 
                         $("#show_name").val(title);
-                        $("#show_info").val(plot);          
-                        
+                        $("#show_info").val(plot);
+
                         $('#display_poster_img').show();
                         $('#series_poster').val(poster_name);
                         $('#poster_link').val(poster);
-                        $('#imdb_poster_image').attr('src', poster); 
-                        
+                        $('#imdb_poster_image').attr('src', poster);
+
                         //tinyMCE.activeEditor.setContent(plot);
-                        
+
                         //$("#actors_id").val(actors).trigger('change');
-                        //$("#director_id").val(director).trigger('change'); 
+                        //$("#director_id").val(director).trigger('change');
                         $("#director_id").val('');
                         $("#director_id").prepend(director).trigger('change');
 
                         //alert(actors);
                         $("#actors_id").val('');
                         $("#actors_id").prepend(actors).trigger('change');
-     
+
 
                         $('#result').html('<div class="alert alert-success alert-dismissable m-t-15"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>Data imported successfully.</div>');
-                        $('#import_show_btn').html('{{trans('words.fetch')}}');             
+                        $('#import_show_btn').html('{{trans('words.fetch')}}');
 
                     } else {
 
@@ -667,7 +667,7 @@ $("select").on("select2:select", function (evt) {
                     }
                 }
             });
-        } 
+        }
         else {
             alert('Please input IMDb ID');
         }
@@ -679,11 +679,11 @@ $("select").on("select2:select", function (evt) {
      jQuery(document).ready(function(){
     $(document).on('click', '#import_episode_btn', function() {
         //$('#result').html('');
-        
-        
+
+
         var from = $("#from").val();
         var id = $("#imdb_id_title").val();
- 
+
         if (from != '' && id != '') {
 
           $('.card-box').addClass('payment_loading');
@@ -705,13 +705,13 @@ $("select").on("select2:select", function (evt) {
 
                     var title           = response.title;
                     var plot           = response.plot;
-                    var runtime           = response.runtime;                    
+                    var runtime           = response.runtime;
                     var released           = response.released;
 
                     var poster           = response.poster;
                     var poster_name           = response.poster_name;
- 
-                     
+
+
                     if (imdb_status == 'success') {
 
                       $('.card-box').removeClass('payment_loading');
@@ -720,25 +720,25 @@ $("select").on("select2:select", function (evt) {
                         $("#imdb_id").val(imdbid);
                         $("#imdb_rating").val(imdb_rating);
                         $("#imdb_votes").val(imdb_votes);
-                               
+
 
                         $("#episode_title").val(title);
-                        //$("#show_info").val(plot);                         
+                        //$("#show_info").val(plot);
                         tinyMCE.activeEditor.setContent(plot);
 
-                         
-                        
+
+
                         $("#duration").val(runtime);
                         $("#datepicker-autoclose").val(released);
 
                         $('#display_poster_img').show();
                         $('#video_image').val(poster_name);
                         $('#poster_link').val(poster);
-                        $('#imdb_poster_image').attr('src', poster); 
-                             
+                        $('#imdb_poster_image').attr('src', poster);
+
 
                         $('#result').html('<div class="alert alert-success alert-dismissable m-t-15"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>Data imported successfully.</div>');
-                        $('#import_episode_btn').html('{{trans('words.fetch')}}');             
+                        $('#import_episode_btn').html('{{trans('words.fetch')}}');
 
                     } else {
 
@@ -747,7 +747,7 @@ $("select").on("select2:select", function (evt) {
                     }
                 }
             });
-        } 
+        }
         else {
             alert('Please input IMDb ID');
         }
@@ -755,8 +755,8 @@ $("select").on("select2:select", function (evt) {
 });
 </script>
 <script type="text/javascript">
-  
-$("#notification_type").change(function(){         
+
+$("#notification_type").change(function(){
    var type=$("#notification_type").val();
 
        if(type=="Movies")
@@ -799,8 +799,8 @@ $("#notification_type").change(function(){
 
 </script>
 <script type="text/javascript">
-  
-$("#slider_type").change(function(){         
+
+$("#slider_type").change(function(){
    var type=$("#slider_type").val();
 
        if(type=="Movies")
@@ -841,13 +841,13 @@ $("#slider_type").change(function(){
 
  });
 
-$("#upcoming").change(function(){         
+$("#upcoming").change(function(){
    var type=$("#upcoming").val();
 
        if(type==1)
        {
           $("#hide_when_upcoming").hide();
-          
+
        }
        else
        {
@@ -860,13 +860,13 @@ $("#upcoming").change(function(){
 
 <link rel="stylesheet" href="{{url('packages')}}/barryvdh/elfinder/css/colorbox.css">
 
- 
+
 <script src="{{url('packages')}}/barryvdh/elfinder/js/jquery.colorbox.js"></script>
 <script type="text/javascript" src="{{url('packages')}}/barryvdh/elfinder/js/jquery.colorbox-min.js"></script>
 
 
 <script type="text/javascript">
-     
+
      $(document).on('click','.popup_selector',function (event) {
     event.preventDefault();
     var updateID = $(this).attr('data-inputid'); // Btn id clicked
@@ -883,10 +883,40 @@ $("#upcoming").change(function(){
     });
 
 });
- 
 
- </script>       
- 
+// Global function for elFinder file selection
+function processSelectedFile(filePath, requestingField) {
+    var elfinderUrl = "{{ URL::to('/') }}/";
+    var fullPath = elfinderUrl + filePath.replace(/\\/g,"/");
+
+    // Update the input field with the file path
+    $('#' + requestingField).val(filePath);
+
+    // If there's a preview element, update it
+    var previewElement = $('#' + requestingField + '_preview');
+    if (previewElement.length > 0) {
+        previewElement.html('');
+        previewElement.append(
+            $('<img>').css('height', '5rem').attr('src', fullPath)
+        );
+    }
+
+    // If there's an image holder, update it
+    var imageHolder = $('#' + requestingField.replace('_link', '_image_holder'));
+    if (imageHolder.length > 0) {
+        imageHolder.html('');
+        imageHolder.append(
+            $('<img>').css('height', '5rem').attr('src', fullPath)
+        );
+    }
+
+    // Trigger change event
+    $('#' + requestingField).trigger('change');
+}
+
+
+ </script>
+
 
     </body>
 </html>

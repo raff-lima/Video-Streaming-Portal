@@ -1,4 +1,7 @@
 <?php
+// Enable output buffering for progress updates
+ob_start();
+
 // Enable error reporting for debugging
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -7,6 +10,8 @@ ini_set('display_errors', 1);
 set_time_limit(300); // 5 minutes
 ini_set('memory_limit', '512M');
 ini_set('max_execution_time', '300');
+ini_set('output_buffering', 'Off');
+ini_set('zlib.output_compression', 'Off');
 
 session_start();
 
@@ -487,54 +492,71 @@ PAYPAL_LIVE_CLIENT_SECRET=
                         exit;
                       }
 
-                      $templine = '';
-                      $lines = file($filename);
+                      // Mostrar progresso na tela
+                      echo "<div class='notification is-info'>Importing database... This may take a minute.</div>";
+                      echo "<div id='progress'>Starting import...</div>";
+                      echo "<script>function updateProgress(msg) { document.getElementById('progress').innerHTML = msg; }</script>";
+                      if(ob_get_level() > 0) @ob_flush();
+                      flush();
+
+                      // Desabilitar checks para importação mais rápida
+                      mysqli_query($con, "SET FOREIGN_KEY_CHECKS=0");
+                      mysqli_query($con, "SET SQL_MODE='NO_AUTO_VALUE_ON_ZERO'");
+                      mysqli_query($con, "SET time_zone = '+00:00'");
+
+                      // Ler arquivo SQL completo
+                      $sql_content = file_get_contents($filename);
                       @file_put_contents('../../storage/logs/installer_debug.log',
-                        date('Y-m-d H:i:s') . " - SQL file loaded, " . count($lines) . " lines found\n",
+                        date('Y-m-d H:i:s') . " - SQL file loaded, " . strlen($sql_content) . " bytes\n",
+                        FILE_APPEND
+                      );
+
+                      // Remover comentários
+                      $sql_content = preg_replace('/^--.*$/m', '', $sql_content);
+
+                      // Dividir em queries individuais
+                      $queries = array_filter(array_map('trim', explode(';', $sql_content)));
+                      $total_queries = count($queries);
+
+                      @file_put_contents('../../storage/logs/installer_debug.log',
+                        date('Y-m-d H:i:s') . " - Processing $total_queries queries\n",
                         FILE_APPEND
                       );
 
                       $query_count = 0;
                       $error_count = 0;
 
-                      foreach($lines as $line_num => $line){
-                        if(substr($line, 0, 2) == '--' || $line == '')
-                          continue;
-                        $templine .= $line;
-                        $query = false;
-                        if(substr(trim($line), -1, 1) == ';'){
-                          $query = mysqli_query($con, $templine);
-                          $query_count++;
+                      foreach($queries as $query) {
+                        if(empty($query)) continue;
 
-                          // Log erro se query falhar
-                          if(!$query && mysqli_error($con)) {
-                            $error_count++;
-                            @file_put_contents('../../storage/logs/installer_debug.log',
-                              date('Y-m-d H:i:s') . " - Query $query_count error (line $line_num): " . mysqli_error($con) . "\n",
-                              FILE_APPEND
-                            );
-                          }
+                        $result = mysqli_query($con, $query);
+                        $query_count++;
 
-                          $templine = '';
+                        if(!$result && mysqli_error($con)) {
+                          $error_count++;
+                          $error_msg = mysqli_error($con);
+                          @file_put_contents('../../storage/logs/installer_debug.log',
+                            date('Y-m-d H:i:s') . " - Query $query_count error: $error_msg\n",
+                            FILE_APPEND
+                          );
+                        }
 
-                          // Log progresso a cada 100 queries
-                          if($query_count % 100 == 0) {
-                            @file_put_contents('../../storage/logs/installer_debug.log',
-                              date('Y-m-d H:i:s') . " - Progress: $query_count queries executed\n",
-                              FILE_APPEND
-                            );
-                          }
+                        // Update progress every 50 queries
+                        if($query_count % 50 == 0) {
+                          $progress_percent = round(($query_count / $total_queries) * 100);
+                          echo "<script>updateProgress('Processed $query_count / $total_queries queries ($progress_percent%)');</script>";
+                          if(ob_get_level() > 0) @ob_flush();
+                          flush();
+
+                          @file_put_contents('../../storage/logs/installer_debug.log',
+                            date('Y-m-d H:i:s') . " - Progress: $query_count / $total_queries queries ($progress_percent%)\n",
+                            FILE_APPEND
+                          );
                         }
                       }
 
-                      @file_put_contents('../../storage/logs/installer_debug.log',
-                        date('Y-m-d H:i:s') . " - SQL import completed. Total: $query_count queries, $error_count errors\n",
-                        FILE_APPEND
-                      );
-
-                      //Update buyer name and code
-                      $envato_sql="UPDATE settings SET `envato_buyer_name` = '".$_SESSION['envato_buyer_name']."',`envato_purchase_code` = '".$_SESSION['envato_purchase_code']."'WHERE `id`='1'";
-                      mysqli_query($con, $envato_sql);
+                      // Reabilitar checks
+                      mysqli_query($con, "SET FOREIGN_KEY_CHECKS=1");
 
                       @file_put_contents('../../storage/logs/installer_debug.log',
                         date('Y-m-d H:i:s') . " - Settings updated, showing success form\n",

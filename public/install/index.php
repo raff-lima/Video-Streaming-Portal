@@ -612,6 +612,7 @@ PAYPAL_LIVE_CLIENT_SECRET=
                     </form><?php
                   } // fecha else do if(!empty($db_host))
                 } // fecha if($_POST && isset($_POST["lcscs"]))
+                ?>
               break;
             case "2": ?>
               <div class="tabs is-fullwidth">

@@ -523,6 +523,14 @@ PAYPAL_LIVE_CLIENT_SECRET=
                         FILE_APPEND
                       );
 
+                      // Log das primeiras 3 queries para debug
+                      for($i = 0; $i < min(3, $total_queries); $i++) {
+                        @file_put_contents('../../storage/logs/installer_debug.log',
+                          date('Y-m-d H:i:s') . " - Query #" . ($i+1) . " preview: " . substr($queries[$i], 0, 100) . "...\n",
+                          FILE_APPEND
+                        );
+                      }
+
                       echo "<script>updateProgress('Starting execution of $total_queries queries...');</script>";
                       if(ob_get_level() > 0) @ob_flush();
                       flush();
@@ -544,6 +552,12 @@ PAYPAL_LIVE_CLIENT_SECRET=
                         );
 
                         $result = @mysqli_query($con, $query);
+
+                        @file_put_contents('../../storage/logs/installer_debug.log',
+                          date('Y-m-d H:i:s') . " - Query #" . ($query_count + 1) . " executed, result: " . ($result ? "OK" : "FAIL") . "\n",
+                          FILE_APPEND
+                        );
+
                         $query_count++;
 
                         if(!$result && mysqli_error($con)) {
@@ -555,6 +569,11 @@ PAYPAL_LIVE_CLIENT_SECRET=
                             FILE_APPEND
                           );
                         }
+
+                        @file_put_contents('../../storage/logs/installer_debug.log',
+                          date('Y-m-d H:i:s') . " - After error check, continuing loop\n",
+                          FILE_APPEND
+                        );
 
                         // Update progress every 10 queries
                         if($query_count % 10 == 0) {

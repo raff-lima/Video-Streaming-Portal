@@ -534,6 +534,10 @@ PAYPAL_LIVE_CLIENT_SECRET=
                         date('Y-m-d H:i:s') . " - About to start foreach loop\n",
                         FILE_APPEND
                       );
+
+                      foreach($queries as $query) {
+                        if(empty($query)) continue;
+
                         @file_put_contents('../../storage/logs/installer_debug.log',
                           date('Y-m-d H:i:s') . " - Executing query #" . ($query_count + 1) . "\n",
                           FILE_APPEND
@@ -554,6 +558,9 @@ PAYPAL_LIVE_CLIENT_SECRET=
 
                         // Update progress every 10 queries
                         if($query_count % 10 == 0) {
+                          $progress_percent = round(($query_count / $total_queries) * 100);
+                          echo "<script>updateProgress('Executed $query_count / $total_queries queries ($progress_percent%)');</script>";
+                          if(ob_get_level() > 0) @ob_flush();
                           flush();
 
                           @file_put_contents('../../storage/logs/installer_debug.log',
@@ -612,7 +619,6 @@ PAYPAL_LIVE_CLIENT_SECRET=
                     </form><?php
                   } // fecha else do if(!empty($db_host))
                 } // fecha if($_POST && isset($_POST["lcscs"]))
-                ?>
               break;
             case "2": ?>
               <div class="tabs is-fullwidth">
@@ -657,8 +663,9 @@ PAYPAL_LIVE_CLIENT_SECRET=
               }else{ ?>
                 <div class='notification is-danger'>Sorry, Something Went Wrong.</div><?php
               }
-            break;
-          } ?>
+              break;
+            } // fecha switch
+            ?>
         </div>
       </div>
     </div>

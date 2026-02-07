@@ -7,6 +7,7 @@
 /vendor
 .env
 .env.backup
+.env.production
 .phpunit.result.cache
 Homestead.json
 Homestead.yaml
@@ -16,20 +17,3 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
-.DS_Store
-Thumbs.db
-*.swp
-*.swo
-*~
-
-# Stripe vendor libraries (should not be committed)
-/public/stripe-php/
-/public/stripe_web/vendor/
-
-# Manter arquivos Docker e deploy
-!Dockerfile
-!.dockerignore
-!docker/
-!docker-compose.yml
-!.env.production
-!DEPLOY_COOLIFY.md

@@ -505,6 +505,8 @@ PAYPAL_LIVE_CLIENT_SECRET=
                       mysqli_query($con, "SET time_zone = '+00:00'");
                       mysqli_query($con, "SET wait_timeout=600");
                       mysqli_query($con, "SET interactive_timeout=600");
+                      mysqli_query($con, "SET net_read_timeout=600");
+                      mysqli_query($con, "SET net_write_timeout=600");
 
                       // Ler arquivo SQL completo
                       $sql_content = file_get_contents($filename);
@@ -517,69 +519,60 @@ PAYPAL_LIVE_CLIENT_SECRET=
                       $sql_content = preg_replace('/^--.*$/m', '', $sql_content);
                       $sql_content = preg_replace('/^\s*$/m', '', $sql_content);
 
+                      // Dividir em queries
+                      $queries = array_filter(array_map('trim', explode(';', $sql_content)));
+                      $total_queries = count($queries);
+
                       @file_put_contents('../../storage/logs/installer_debug.log',
-                        date('Y-m-d H:i:s') . " - Starting multi_query import\n",
+                        date('Y-m-d H:i:s') . " - Processing $total_queries queries\n",
                         FILE_APPEND
                       );
 
-                      echo "<script>updateProgress('Executing SQL import...');</script>";
+                      echo "<script>updateProgress('Executing $total_queries SQL queries...');</script>";
                       if(ob_get_level() > 0) @ob_flush();
                       flush();
 
-                      // Usar multi_query para executar tudo de uma vez
-                      if (mysqli_multi_query($con, $sql_content)) {
-                        @file_put_contents('../../storage/logs/installer_debug.log',
-                          date('Y-m-d H:i:s') . " - Multi_query started successfully\n",
-                          FILE_APPEND
-                        );
-                        
-                        $query_count = 0;
-                        do {
-                          $query_count++;
-                          
-                          // Store first result set
-                          if ($result = mysqli_store_result($con)) {
-                            mysqli_free_result($result);
-                          }
-                          
-                          // Check for errors
-                          if (mysqli_error($con)) {
+                      $query_count = 0;
+                      $error_count = 0;
+                      $start_time = time();
+
+                      foreach($queries as $query) {
+                        if(empty($query)) continue;
+
+                        $result = @mysqli_query($con, $query);
+                        $query_count++;
+
+                        if(!$result && mysqli_error($con)) {
+                          $error_count++;
+                          // Log apenas os primeiros 5 erros
+                          if($error_count <= 5) {
                             @file_put_contents('../../storage/logs/installer_debug.log',
                               date('Y-m-d H:i:s') . " - Error at query $query_count: " . mysqli_error($con) . "\n",
                               FILE_APPEND
                             );
                           }
-                          
-                          // Update progress every 50 queries
-                          if($query_count % 50 == 0) {
-                            echo "<script>updateProgress('Processed $query_count queries...');</script>";
-                            if(ob_get_level() > 0) @ob_flush();
-                            flush();
-                            
-                            @file_put_contents('../../storage/logs/installer_debug.log',
-                              date('Y-m-d H:i:s') . " - Progress: $query_count queries processed\n",
-                              FILE_APPEND
-                            );
-                          }
-                          
-                          // Move to next result
-                          if (!mysqli_more_results($con)) {
-                            break;
-                          }
-                        } while (mysqli_next_result($con));
+                        }
 
-                        @file_put_contents('../../storage/logs/installer_debug.log',
-                          date('Y-m-d H:i:s') . " - Multi_query completed: $query_count queries executed\n",
-                          FILE_APPEND
-                        );
-                      } else {
-                        @file_put_contents('../../storage/logs/installer_debug.log',
-                          date('Y-m-d H:i:s') . " - Multi_query FAILED: " . mysqli_error($con) . "\n",
-                          FILE_APPEND
-                        );
-                        echo "<div class='notification is-danger'>SQL Import Error: " . mysqli_error($con) . "</div>";
-                        exit;
+                        // Update progress every 50 queries
+                        if($query_count % 50 == 0) {
+                          $elapsed = time() - $start_time;
+                          $progress_percent = round(($query_count / $total_queries) * 100);
+                          echo "<script>updateProgress('Progress: $query_count / $total_queries queries ($progress_percent%) - {$elapsed}s elapsed');</script>";
+                          if(ob_get_level() > 0) @ob_flush();
+                          flush();
+                          
+                          @file_put_contents('../../storage/logs/installer_debug.log',
+                            date('Y-m-d H:i:s') . " - Progress: $query_count/$total_queries ({$progress_percent}%) - {$elapsed}s\n",
+                            FILE_APPEND
+                          );
+                        }
                       }
+
+                      $total_time = time() - $start_time;
+                      @file_put_contents('../../storage/logs/installer_debug.log',
+                        date('Y-m-d H:i:s') . " - Import completed: $query_count queries, $error_count errors, {$total_time}s total\n",
+                        FILE_APPEND
+                      );
 
                       // Reabilitar checks
                       mysqli_query($con, "SET FOREIGN_KEY_CHECKS=1");

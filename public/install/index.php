@@ -497,7 +497,7 @@ PAYPAL_LIVE_CLIENT_SECRET=
                         date('Y-m-d H:i:s') . " - [1] Starting HTML output\n",
                         FILE_APPEND
                       );
-                      
+
                       echo "<div class='notification is-info'>Importing database... This may take a minute.</div>";
                       echo "<div id='progress'>Starting import...</div>";
                       echo "<script>function updateProgress(msg) { document.getElementById('progress').innerHTML = msg; }</script>";
@@ -512,22 +512,22 @@ PAYPAL_LIVE_CLIENT_SECRET=
                       // Desabilitar checks para importação mais rápida
                       mysqli_query($con, "SET FOREIGN_KEY_CHECKS=0");
                       @file_put_contents('../../storage/logs/installer_debug.log', date('Y-m-d H:i:s') . " - [3] SET FOREIGN_KEY_CHECKS done\n", FILE_APPEND);
-                      
+
                       mysqli_query($con, "SET SQL_MODE='NO_AUTO_VALUE_ON_ZERO'");
                       @file_put_contents('../../storage/logs/installer_debug.log', date('Y-m-d H:i:s') . " - [4] SET SQL_MODE done\n", FILE_APPEND);
-                      
+
                       mysqli_query($con, "SET time_zone = '+00:00'");
                       @file_put_contents('../../storage/logs/installer_debug.log', date('Y-m-d H:i:s') . " - [5] SET time_zone done\n", FILE_APPEND);
-                      
+
                       mysqli_query($con, "SET wait_timeout=600");
                       @file_put_contents('../../storage/logs/installer_debug.log', date('Y-m-d H:i:s') . " - [6] SET wait_timeout done\n", FILE_APPEND);
-                      
+
                       mysqli_query($con, "SET interactive_timeout=600");
                       @file_put_contents('../../storage/logs/installer_debug.log', date('Y-m-d H:i:s') . " - [7] SET interactive_timeout done\n", FILE_APPEND);
-                      
+
                       mysqli_query($con, "SET net_read_timeout=600");
                       @file_put_contents('../../storage/logs/installer_debug.log', date('Y-m-d H:i:s') . " - [8] SET net_read_timeout done\n", FILE_APPEND);
-                      
+
                       mysqli_query($con, "SET net_write_timeout=600");
                       @file_put_contents('../../storage/logs/installer_debug.log', date('Y-m-d H:i:s') . " - [9] SET net_write_timeout done\n", FILE_APPEND);
 
@@ -536,9 +536,9 @@ PAYPAL_LIVE_CLIENT_SECRET=
                         date('Y-m-d H:i:s') . " - [10] Before file_get_contents\n",
                         FILE_APPEND
                       );
-                      
+
                       $sql_content = file_get_contents($filename);
-                      
+
                       @file_put_contents('../../storage/logs/installer_debug.log',
                         date('Y-m-d H:i:s') . " - [11] SQL file loaded, " . strlen($sql_content) . " bytes\n",
                         FILE_APPEND
@@ -549,16 +549,16 @@ PAYPAL_LIVE_CLIENT_SECRET=
                         date('Y-m-d H:i:s') . " - [12] Before preg_replace (comments)\n",
                         FILE_APPEND
                       );
-                      
+
                       $sql_content = preg_replace('/^--.*$/m', '', $sql_content);
-                      
+
                       @file_put_contents('../../storage/logs/installer_debug.log',
                         date('Y-m-d H:i:s') . " - [13] After preg_replace comments, before empty lines\n",
                         FILE_APPEND
                       );
-                      
+
                       $sql_content = preg_replace('/^\s*$/m', '', $sql_content);
-                      
+
                       @file_put_contents('../../storage/logs/installer_debug.log',
                         date('Y-m-d H:i:s') . " - [14] After preg_replace empty lines\n",
                         FILE_APPEND
@@ -572,7 +572,7 @@ PAYPAL_LIVE_CLIENT_SECRET=
                       // Salvar SQL limpo em arquivo temporário
                       $temp_sql = '../../storage/logs/import_temp.sql';
                       file_put_contents($temp_sql, $sql_content);
-                      
+
                       @file_put_contents('../../storage/logs/installer_debug.log',
                         date('Y-m-d H:i:s') . " - [16] Temp SQL file created: $temp_sql\n",
                         FILE_APPEND
@@ -589,51 +589,98 @@ PAYPAL_LIVE_CLIENT_SECRET=
 
                       // Usar mysql CLI que é muito mais rápido
                       $start_time = time();
-                      
-                      // Construir comando mariadb (mysql está deprecated)
+
+                      // Construir comando mariadb com default-auth para MySQL 8 compatibility
                       $mysql_cmd = sprintf(
-                        "mariadb --skip-ssl -h%s -u%s -p%s %s < %s 2>&1",
+                        "mariadb --skip-ssl --default-auth=mysql_native_password -h%s -u%s -p%s %s < %s 2>&1",
                         escapeshellarg($db_host),
                         escapeshellarg($db_user),
                         escapeshellarg($db_pass),
                         escapeshellarg($db_name),
                         escapeshellarg($temp_sql)
                       );
-                      
+
                       @file_put_contents('../../storage/logs/installer_debug.log',
-                        date('Y-m-d H:i:s') . " - [20] Executing mariadb command with --skip-ssl\n",
+                        date('Y-m-d H:i:s') . " - [20] Executing mariadb with --default-auth=mysql_native_password\n",
                         FILE_APPEND
                       );
-                      
+
                       echo "<script>updateProgress('Importing via MariaDB CLI...');</script>";
                       if(ob_get_level() > 0) @ob_flush();
                       flush();
-                      
+
                       $output = [];
                       $return_var = 0;
                       exec($mysql_cmd, $output, $return_var);
-                      
+
                       $total_time = time() - $start_time;
-                      
+
                       @file_put_contents('../../storage/logs/installer_debug.log',
                         date('Y-m-d H:i:s') . " - [21] MariaDB CLI completed in {$total_time}s, return code: $return_var\n",
                         FILE_APPEND
                       );
-                      
+
                       if($return_var !== 0) {
                         $error_msg = implode("\n", $output);
                         @file_put_contents('../../storage/logs/installer_debug.log',
-                          date('Y-m-d H:i:s') . " - [ERROR] Import failed: $error_msg\n",
+                          date('Y-m-d H:i:s') . " - [ERROR] MariaDB CLI failed: $error_msg\n",
                           FILE_APPEND
                         );
-                        echo "<div class='notification is-danger'>Import Error: $error_msg</div>";
-                        exit;
+
+                        // Fallback para mysqli query-by-query
+                        @file_put_contents('../../storage/logs/installer_debug.log',
+                          date('Y-m-d H:i:s') . " - [24] Falling back to mysqli method\n",
+                          FILE_APPEND
+                        );
+
+                        echo "<script>updateProgress('CLI failed, using PHP method...');</script>";
+                        if(ob_get_level() > 0) @ob_flush();
+                        flush();
+
+                        // Ler o SQL do arquivo temp
+                        $sql_content = file_get_contents($temp_sql);
+                        $queries = explode(';', $sql_content);
+                        $total = count($queries);
+                        $success = 0;
+                        $failed = 0;
+
+                        $start_time = time();
+                        foreach($queries as $i => $query) {
+                          $query = trim($query);
+                          if(empty($query)) continue;
+
+                          if(@mysqli_query($con, $query)) {
+                            $success++;
+                          } else {
+                            $failed++;
+                          }
+
+                          // Update progress every 100 queries (sem logging para ser rápido)
+                          if($i % 100 == 0 && $i > 0) {
+                            $percent = round(($i / $total) * 100);
+                            echo "<script>updateProgress('Processing: $i/$total ($percent%)');</script>";
+                            if(ob_get_level() > 0) @ob_flush();
+                            flush();
+                          }
+                        }
+
+                        $total_time = time() - $start_time;
+
+                        @file_put_contents('../../storage/logs/installer_debug.log',
+                          date('Y-m-d H:i:s') . " - [25] mysqli fallback completed: $success success, $failed failed, {$total_time}s\n",
+                          FILE_APPEND
+                        );
+
+                        if($failed > ($total * 0.1)) { // Se mais de 10% falharam
+                          echo "<div class='notification is-danger'>Too many errors during import: $failed queries failed</div>";
+                          exit;
+                        }
+                      } else {
+                        @file_put_contents('../../storage/logs/installer_debug.log',
+                          date('Y-m-d H:i:s') . " - [22] Import successful, took {$total_time}s\n",
+                          FILE_APPEND
+                        );
                       }
-                      
-                      @file_put_contents('../../storage/logs/installer_debug.log',
-                        date('Y-m-d H:i:s') . " - [22] Import successful, took {$total_time}s\n",
-                        FILE_APPEND
-                      );
 
                       // Limpar arquivo temporário
                       @unlink($temp_sql);
@@ -645,7 +692,7 @@ PAYPAL_LIVE_CLIENT_SECRET=
                         date('Y-m-d H:i:s') . " - [23] FOREIGN_KEY_CHECKS restored, showing success form\n",
                         FILE_APPEND
                       );
-                      
+
                       echo "<script>updateProgress('Import completed in {$total_time}s!');</script>";
                       if(ob_get_level() > 0) @ob_flush();
                       flush();

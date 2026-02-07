@@ -583,16 +583,16 @@ PAYPAL_LIVE_CLIENT_SECRET=
                       flush();
 
                       @file_put_contents('../../storage/logs/installer_debug.log',
-                        date('Y-m-d H:i:s') . " - [19] Using mysql CLI for faster import\n",
+                        date('Y-m-d H:i:s') . " - [19] Using mariadb CLI for faster import\n",
                         FILE_APPEND
                       );
 
                       // Usar mysql CLI que é muito mais rápido
                       $start_time = time();
                       
-                      // Construir comando mysql
+                      // Construir comando mariadb (mysql está deprecated)
                       $mysql_cmd = sprintf(
-                        "mysql -h%s -u%s -p%s %s < %s 2>&1",
+                        "mariadb --skip-ssl -h%s -u%s -p%s %s < %s 2>&1",
                         escapeshellarg($db_host),
                         escapeshellarg($db_user),
                         escapeshellarg($db_pass),
@@ -601,11 +601,11 @@ PAYPAL_LIVE_CLIENT_SECRET=
                       );
                       
                       @file_put_contents('../../storage/logs/installer_debug.log',
-                        date('Y-m-d H:i:s') . " - [20] Executing mysql command\n",
+                        date('Y-m-d H:i:s') . " - [20] Executing mariadb command with --skip-ssl\n",
                         FILE_APPEND
                       );
                       
-                      echo "<script>updateProgress('Importing via MySQL CLI...');</script>";
+                      echo "<script>updateProgress('Importing via MariaDB CLI...');</script>";
                       if(ob_get_level() > 0) @ob_flush();
                       flush();
                       
@@ -616,7 +616,7 @@ PAYPAL_LIVE_CLIENT_SECRET=
                       $total_time = time() - $start_time;
                       
                       @file_put_contents('../../storage/logs/installer_debug.log',
-                        date('Y-m-d H:i:s') . " - [21] MySQL CLI completed in {$total_time}s, return code: $return_var\n",
+                        date('Y-m-d H:i:s') . " - [21] MariaDB CLI completed in {$total_time}s, return code: $return_var\n",
                         FILE_APPEND
                       );
                       

@@ -1,0 +1,51 @@
+# Docker Compose para testes locais
+# O Coolify não usa este arquivo, mas é útil para testar localmente
+
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: video_streaming_app
+    ports:
+      - "8080:80"
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=video_streaming
+      - DB_USERNAME=root
+      - DB_PASSWORD=secret
+      - RUN_MIGRATIONS=true
+    volumes:
+      - ./storage:/var/www/html/storage
+      - ./public/upload:/var/www/html/public/upload
+    depends_on:
+      - mysql
+    networks:
+      - video_streaming_network
+
+  mysql:
+    image: mysql:8.0
+    container_name: video_streaming_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: video_streaming
+      MYSQL_USER: user
+      MYSQL_PASSWORD: secret
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - video_streaming_network
+
+volumes:
+  mysql_data:
+
+networks:
+  video_streaming_network:
+    driver: bridge

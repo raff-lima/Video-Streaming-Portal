@@ -610,8 +610,8 @@ PAYPAL_LIVE_CLIENT_SECRET=
                         <button type="submit" class="button is-link">IMPORT <i class="fa-solid fa-arrow-right pl-10"></i></button>
                       </div>
                     </form><?php
-                }
-              }
+                  } // fecha else do if(!empty($db_host))
+                } // fecha if($_POST && isset($_POST["lcscs"]))
               break;
             case "2": ?>
               <div class="tabs is-fullwidth">

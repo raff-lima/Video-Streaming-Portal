@@ -1,23 +1,24 @@
-FROM php:8.2-fpm
+FROM php:8.2-fpm-alpine
 
-# Instalar dependências do sistema
-RUN apt-get update && apt-get install -y \
+# Instalar dependências do sistema (Alpine Linux)
+RUN apk update && apk add --no-cache \
     git \
     curl \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    libzip-dev \
-    libfreetype6-dev \
-    libjpeg62-turbo-dev \
-    zip \
-    unzip \
     nginx \
     supervisor \
-    cron \
+    bash \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    libzip-dev \
+    oniguruma-dev \
+    libxml2-dev \
+    icu-dev \
+    zip \
+    unzip \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip intl \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    && docker-php-ext-install -j$(nproc) pdo_mysql mbstring exif pcntl bcmath gd zip intl \
+    && rm -rf /var/cache/apk/*
 
 # Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -25,39 +26,42 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Configurar diretório de trabalho
 WORKDIR /var/www/html
 
-# Copiar arquivos de dependências primeiro (cache layer)
-COPY composer.json composer.lock ./
-
-# Instalar dependências do PHP
-RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
-
-# Copiar todo o código do projeto
+# Copiar todo o código primeiro
 COPY . .
 
-# Finalizar instalação do Composer
-RUN composer dump-autoload --optimize
+# Instalar dependências do Composer
+RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist \
+    && composer dump-autoload --optimize
 
-# Configurar permissões
-RUN chown -R www-data:www-data /var/www/html \
+# Criar diretórios necessários e configurar permissões
+RUN mkdir -p /var/www/html/storage/framework/cache \
+    && mkdir -p /var/www/html/storage/framework/sessions \
+    && mkdir -p /var/www/html/storage/framework/views \
+    && mkdir -p /var/www/html/storage/logs \
+    && mkdir -p /var/www/html/bootstrap/cache \
+    && mkdir -p /var/www/html/public/upload \
+    && chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/storage \
     && chmod -R 775 /var/www/html/bootstrap/cache \
-    && chmod -R 775 /var/www/html/public
+    && chmod -R 775 /var/www/html/public/upload
 
-# Copiar configuração do Nginx
-COPY docker/nginx.conf /etc/nginx/sites-available/default
+# Configurar Nginx (Alpine usa http.d)
+RUN mkdir -p /etc/nginx/http.d
+COPY docker/nginx.conf /etc/nginx/http.d/default.conf
 
 # Copiar configuração do Supervisor
-COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY docker/supervisord.conf /etc/supervisord.conf
 
 # Copiar script de inicialização
 COPY docker/start.sh /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh
 
-# Criar link simbólico do storage (será executado no start.sh se necessário)
-# RUN php artisan storage:link
-
 # Expor porta 80
 EXPOSE 80
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost/ || exit 1
 
 # Comando de inicialização
 CMD ["/usr/local/bin/start.sh"]

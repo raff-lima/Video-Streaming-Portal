@@ -611,8 +611,6 @@ PAYPAL_LIVE_CLIENT_SECRET=
                       </div>
                     </form><?php
                 }
-              }else{ ?>
-                <div class='notification is-danger'>Sorry, Something Went Wrong.</div><?php
               }
               break;
             case "2": ?>

@@ -523,29 +523,37 @@ PAYPAL_LIVE_CLIENT_SECRET=
                         FILE_APPEND
                       );
 
+                      echo "<script>updateProgress('Starting execution of $total_queries queries...');</script>";
+                      if(ob_get_level() > 0) @ob_flush();
+                      flush();
+
                       $query_count = 0;
                       $error_count = 0;
 
-                      foreach($queries as $query) {
-                        if(empty($query)) continue;
+                      @file_put_contents('../../storage/logs/installer_debug.log',
+                        date('Y-m-d H:i:s') . " - About to start foreach loop\n",
+                        FILE_APPEND
+                      );
+                        @file_put_contents('../../storage/logs/installer_debug.log',
+                          date('Y-m-d H:i:s') . " - Executing query #" . ($query_count + 1) . "\n",
+                          FILE_APPEND
+                        );
 
-                        $result = mysqli_query($con, $query);
+                        $result = @mysqli_query($con, $query);
                         $query_count++;
 
                         if(!$result && mysqli_error($con)) {
                           $error_count++;
                           $error_msg = mysqli_error($con);
                           @file_put_contents('../../storage/logs/installer_debug.log',
-                            date('Y-m-d H:i:s') . " - Query $query_count error: $error_msg\n",
+                            date('Y-m-d H:i:s') . " - Query $query_count error: $error_msg\n" .
+                            "Query: " . substr($query, 0, 200) . "...\n",
                             FILE_APPEND
                           );
                         }
 
-                        // Update progress every 50 queries
-                        if($query_count % 50 == 0) {
-                          $progress_percent = round(($query_count / $total_queries) * 100);
-                          echo "<script>updateProgress('Processed $query_count / $total_queries queries ($progress_percent%)');</script>";
-                          if(ob_get_level() > 0) @ob_flush();
+                        // Update progress every 10 queries
+                        if($query_count % 10 == 0) {
                           flush();
 
                           @file_put_contents('../../storage/logs/installer_debug.log',

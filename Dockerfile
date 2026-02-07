@@ -51,7 +51,13 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 # Configurar PHP
 RUN echo "upload_max_filesize = 100M" >> /usr/local/etc/php/conf.d/uploads.ini && \
     echo "post_max_size = 100M" >> /usr/local/etc/php/conf.d/uploads.ini && \
-    echo "memory_limit = 256M" >> /usr/local/etc/php/conf.d/uploads.ini
+    echo "memory_limit = 512M" >> /usr/local/etc/php/conf.d/uploads.ini && \
+    echo "max_execution_time = 600" >> /usr/local/etc/php/conf.d/uploads.ini && \
+    echo "max_input_time = 600" >> /usr/local/etc/php/conf.d/uploads.ini && \
+    echo "default_socket_timeout = 600" >> /usr/local/etc/php/conf.d/uploads.ini
+
+# Configurar PHP-FPM
+RUN echo "request_terminate_timeout = 600" >> /usr/local/etc/php-fpm.d/www.conf
 
 # Configurar Nginx
 COPY docker/nginx.conf /etc/nginx/nginx.conf

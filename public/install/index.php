@@ -1,4 +1,8 @@
 <?php
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 session_start();
 
 // Bypass verificação de licença para instalação
@@ -10,15 +14,15 @@ if(!isset($_SESSION['license_verified'])) {
 
 require_once '../lb_helper.php'; // Include LicenseBox external/client api helper file
 $api = new LicenseBoxAPI(); // Initialize a new LicenseBoxAPI object
- 
+
 $filename = 'database.sql';
 
 $product_info=$api->get_latest_version();
 
 function getBaseUrl() {
-     
-     if( isset($_SERVER['HTTPS'] ) ) 
-      {  
+
+     if( isset($_SERVER['HTTPS'] ) )
+      {
         $file_path = 'https://'.$_SERVER['SERVER_NAME'] . dirname($_SERVER['REQUEST_URI']).'/';
       }
       else
@@ -28,7 +32,7 @@ function getBaseUrl() {
 
       return substr($file_path,0,-8);
 }
- 
+
 //print_r($product_info);
 //exit;
 ?>
@@ -39,7 +43,7 @@ function getBaseUrl() {
     <title><?php echo $product_info['product_name']; ?> - Installer</title>
 	<!-- Favicons -->
 	<link rel="icon" type="image/png" href="img/favicon.png">
-	
+
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.5/css/bulma.min.css"/>
     <link rel="stylesheet" href="css/fontawesome.min.css"/>
@@ -55,7 +59,7 @@ function getBaseUrl() {
       $errors = false;
       $step = isset($_GET['step']) ? $_GET['step'] : '';
     ?>
-    <div class="container"> 
+    <div class="container">
       <div class="section pt-20 pb-20">
         <div class="column is-6 is-offset-3">
 		  <div class="logo_header">
@@ -96,10 +100,10 @@ function getBaseUrl() {
                     </li>
                   </ul>
                 </div>
-				 
+
         <div class="requirement_list">
 					<ul>
-                <?php  
+                <?php
                 // Add or remove your script's requirements below
                 if(phpversion() < "8.1"){
                   $errors = true;
@@ -109,85 +113,85 @@ function getBaseUrl() {
                 }
 
                 if(!extension_loaded('bcmath')){
-                  $errors = true; 
+                  $errors = true;
                   echo "<li class='excl_alert'><i class='fa-solid fa-circle-exclamation'></i> BCMath PHP extension missing!</li>";
                 }else{
                   echo "<li><i class='fa-solid fa-circle-check'></i> BCMath PHP extension available</li>";
                 }
 
                 if(!extension_loaded('ctype')){
-                  $errors = true; 
+                  $errors = true;
                   echo "<li class='excl_alert'><i class='fa-solid fa-circle-exclamation'></i> CTYPE PHP extension missing!</li>";
                 }else{
                   echo "<li><i class='fa-solid fa-circle-check'></i> CTYPE PHP extension available</li>";
                 }
 
                 if(!extension_loaded('fileinfo')){
-                  $errors = true; 
+                  $errors = true;
                   echo "<li class='excl_alert'><i class='fa-solid fa-circle-exclamation'></i> Fileinfo PHP extension missing!</li>";
                 }else{
                   echo "<li><i class='fa-solid fa-circle-check'></i> Fileinfo PHP extension available</li>";
                 }
 
                  if(!extension_loaded('json')){
-                  $errors = true; 
+                  $errors = true;
                   echo "<li class='excl_alert'><i class='fa-solid fa-circle-exclamation'></i> JSON PHP extension missing!</li>";
                 }else{
                   echo "<li><i class='fa-solid fa-circle-check'></i> JSON PHP extension available</li>";
                 }
 
-                
+
                 if(!extension_loaded('mbstring')){
-                  $errors = true; 
+                  $errors = true;
                   echo "<li class='excl_alert'><i class='fa-solid fa-circle-exclamation'></i> Mbstring PHP extension missing!</li>";
                 }else{
                   echo "<li><i class='fa-solid fa-circle-check'></i> Mbstring PHP extension available</li>";
                 }
-  
+
 
                 if(!extension_loaded('openssl')){
-                  $errors = true; 
+                  $errors = true;
                 echo "<li class='excl_alert'><i class='fa-solid fa-circle-exclamation'></i> Openssl PHP extension missing!</li>";
                 }else{
                   echo "<li><i class='fa-solid fa-circle-check'></i> Openssl PHP extension available</li>";
                 }
 
                 if(!extension_loaded('pdo')){
-                  $errors = true; 
+                  $errors = true;
                 echo "<li class='excl_alert'><i class='fa-solid fa-circle-exclamation'></i> PDO PHP extension missing!</li>";
                 }else{
                   echo "<li><i class='fa-solid fa-circle-check'></i> PDO PHP extension available</li>";
                 }
 
                 if(!extension_loaded('tokenizer')){
-                  $errors = true; 
+                  $errors = true;
                   echo "<li class='excl_alert'><i class='fa-solid fa-circle-exclamation'></i> Tokenizer PHP extension missing!</li>";
                 }else{
                   echo "<li><i class='fa-solid fa-circle-check'></i> Tokenizer PHP extension available</li>";
                 }
- 
-               
+
+
                 if(!extension_loaded('xml')){
-                  $errors = true; 
+                  $errors = true;
                   echo "<li class='excl_alert'><i class='fa-solid fa-circle-exclamation'></i> XML PHP extension missing!</li>";
                 }else{
                   echo "<li><i class='fa-solid fa-circle-check'></i> XML PHP extension available</li>";
                 }
 
                 if(!extension_loaded('curl')){
-                  $errors = true; 
+                  $errors = true;
                 echo "<li class='excl_alert'><i class='fa-solid fa-circle-exclamation'></i> Curl PHP extension missing!</li>";
                 }else{
                   echo "<li><i class='fa-solid fa-circle-check'></i> Curl PHP extension available</li>";
                 }
-                
+
                 if(!extension_loaded('intl')){
-                  $errors = true; 
+                  $errors = true;
                 echo "<li class='excl_alert'><i class='fa-solid fa-circle-exclamation'></i> Intl PHP extension missing!</li>";
                 }else{
                   echo "<li><i class='fa-solid fa-circle-check'></i> Intl PHP extension available</li>";
                 }
-                  
+
                 ?>
           </ul>
 				</div>
@@ -210,8 +214,8 @@ function getBaseUrl() {
                     </li>
                     <li class="is-active">
                       <a>
-                        <span>Verify</span>		
-						<i class="fa-solid fa-chevron-right"></i>	
+                        <span>Verify</span>
+						<i class="fa-solid fa-chevron-right"></i>
                       </a>
                     </li>
                     <li>
@@ -230,15 +234,15 @@ function getBaseUrl() {
                 <?php
                   $license_code = null;
                   $client_name = null;
-                  
+
                   // Bypass: sempre considerar licença válida
                   if(!empty($_POST['license']) && !empty($_POST['client'])){
                     $_SESSION['envato_buyer_name'] = strip_tags(trim($_POST["client"]));
                     $_SESSION['envato_purchase_code'] = strip_tags(trim($_POST["license"]));
                   }
-                  
+
                   // Se já temos sessão válida ou POST foi enviado, mostrar formulário de próximo passo
-                  if(isset($_SESSION['license_verified']) || (!empty($_POST['license']) && !empty($_POST['client']))){ 
+                  if(isset($_SESSION['license_verified']) || (!empty($_POST['license']) && !empty($_POST['client']))){
                       ?>
                       <form action="index.php?step=1" method="POST">
                         <div class="notification is-success">License verified successfully! (Bypassed)</div>
@@ -263,12 +267,12 @@ function getBaseUrl() {
                           <input class="input" type="text" placeholder="enter your purchase" name="license" required>
                         </div>
                       </div>
-                      
+
                       <div class="mt-15" style='text-align: center;'>
                         <button type="submit" class="button is-link">VERIFY <i class="fa-solid fa-arrow-right pl-10"></i></button>
                       </div>
                     </form>
-                  <?php } 
+                  <?php }
                 break;
               case "1": ?>
                 <div class="tabs is-fullwidth">
@@ -308,7 +312,16 @@ function getBaseUrl() {
                     // Let's import the sql file into the given database
                     if(!empty($db_host)){
 
-                      $myfile = fopen("../../.env", "w") or die("Unable to open file!");
+                      $myfile = @fopen("../../.env", "w");
+                      if(!$myfile) { ?>
+                        <form action="index.php?step=1" method="POST">
+                          <div class='notification is-danger'>Unable to write to .env file. Please check permissions.</div>
+                          <input type="hidden" name="lcscs" id="lcscs" value="<?php echo $valid; ?>">
+                          <div class="mt-15" style='text-align: center;'>
+                            <button type="submit" class="button is-link">TRY AGAIN</button>
+                          </div>
+                        </form>
+                      <?php exit; }
                       $txt = "";
                       fwrite($myfile, $txt);
                       $txt = "APP_NAME=Laravel
@@ -383,14 +396,14 @@ PAYPAL_MODE=sandbox
 PAYPAL_SANDBOX_CLIENT_ID=
 PAYPAL_SANDBOX_CLIENT_SECRET=
 PAYPAL_LIVE_CLIENT_ID=
-PAYPAL_LIVE_CLIENT_SECRET=                      
+PAYPAL_LIVE_CLIENT_SECRET=
 ";
                       fwrite($myfile, $txt);
                       fclose($myfile);
 
                       $con = @mysqli_connect($db_host, $db_user, $db_pass, $db_name);
 
-                      mysqli_query($con,"SET NAMES 'utf8'");  
+                      mysqli_query($con,"SET NAMES 'utf8'");
 
                       if(mysqli_connect_errno()){ ?>
                         <form action="index.php?step=1" method="POST">
@@ -437,12 +450,12 @@ PAYPAL_LIVE_CLIENT_SECRET=
                           $query = mysqli_query($con, $templine);
                           $templine = '';
                         }
-                      } 
+                      }
 
                       //Update buyer name and code
                       $envato_sql="UPDATE settings SET `envato_buyer_name` = '".$_SESSION['envato_buyer_name']."',`envato_purchase_code` = '".$_SESSION['envato_purchase_code']."'WHERE `id`='1'";
                       mysqli_query($con, $envato_sql);
-                       
+
                       ?>
                     <form action="index.php?step=2" method="POST">
                       <div class='notification is-success'>Database was Successfully Imported.</div>
@@ -482,7 +495,7 @@ PAYPAL_LIVE_CLIENT_SECRET=
                         <button type="submit" class="button is-link">IMPORT <i class="fa-solid fa-arrow-right pl-10"></i></button>
                       </div>
                     </form><?php
-                } 
+                }
               }else{ ?>
                 <div class='notification is-danger'>Sorry, Something Went Wrong.</div><?php
               }
@@ -529,7 +542,7 @@ PAYPAL_LIVE_CLIENT_SECRET=
                 <?php
               }else{ ?>
                 <div class='notification is-danger'>Sorry, Something Went Wrong.</div><?php
-              } 
+              }
             break;
           } ?>
         </div>
@@ -548,4 +561,3 @@ PAYPAL_LIVE_CLIENT_SECRET=
   </div>
 </body>
 </html>
- 

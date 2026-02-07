@@ -47,7 +47,7 @@ class IndexController extends Controller
 
         if(!$this->alreadyInstalled())
         {
-            return redirect('public/install');
+            return redirect('install');
         }
 
     	$slider= Slider::where('status',1)->whereRaw("find_in_set('Home',slider_display_on)")->orderby('id','DESC')->get();

@@ -65,6 +65,14 @@ echo "Configurando permissões..."
 chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
+# Garantir permissões de escrita para o instalador
+chown www-data:www-data /var/www/html/.env
+chmod 664 /var/www/html/.env
+chown -R www-data:www-data /var/www/html/config
+chmod -R 775 /var/www/html/config
+chown -R www-data:www-data /var/www/html/public/install
+chmod -R 775 /var/www/html/public/install
+
 echo "==================================="
 echo "✓ Aplicação iniciada com sucesso!"
 echo "==================================="

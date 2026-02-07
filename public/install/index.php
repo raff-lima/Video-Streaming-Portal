@@ -564,133 +564,96 @@ PAYPAL_LIVE_CLIENT_SECRET=
                         FILE_APPEND
                       );
 
-                      // Dividir em queries
                       @file_put_contents('../../storage/logs/installer_debug.log',
-                        date('Y-m-d H:i:s') . " - [15] Before explode\n",
-                        FILE_APPEND
-                      );
-                      
-                      $queries = explode(';', $sql_content);
-                      
-                      @file_put_contents('../../storage/logs/installer_debug.log',
-                        date('Y-m-d H:i:s') . " - [16] After explode, before array_map\n",
-                        FILE_APPEND
-                      );
-                      
-                      $queries = array_map('trim', $queries);
-                      
-                      @file_put_contents('../../storage/logs/installer_debug.log',
-                        date('Y-m-d H:i:s') . " - [17] After array_map, before array_filter\n",
-                        FILE_APPEND
-                      );
-                      
-                      $queries = array_filter($queries);
-                      $total_queries = count($queries);
-                      
-                      @file_put_contents('../../storage/logs/installer_debug.log',
-                        date('Y-m-d H:i:s') . " - [18] After array_filter, total: $total_queries\n",
+                        date('Y-m-d H:i:s') . " - [15] Skipping explode/array operations, using direct file\n",
                         FILE_APPEND
                       );
 
+                      // Salvar SQL limpo em arquivo temporário
+                      $temp_sql = '../../storage/logs/import_temp.sql';
+                      file_put_contents($temp_sql, $sql_content);
+                      
                       @file_put_contents('../../storage/logs/installer_debug.log',
-                        date('Y-m-d H:i:s') . " - Processing $total_queries queries\n",
+                        date('Y-m-d H:i:s') . " - [16] Temp SQL file created: $temp_sql\n",
                         FILE_APPEND
                       );
 
-                      @file_put_contents('../../storage/logs/installer_debug.log',
-                        date('Y-m-d H:i:s') . " - Before echo updateProgress\n",
-                        FILE_APPEND
-                      );
-
-                      echo "<script>updateProgress('Executing $total_queries SQL queries...');</script>";
-
-                      @file_put_contents('../../storage/logs/installer_debug.log',
-                        date('Y-m-d H:i:s') . " - After echo, before flush\n",
-                        FILE_APPEND
-                      );
-
+                      echo "<script>updateProgress('Preparing SQL import...');</script>";
                       if(ob_get_level() > 0) @ob_flush();
                       flush();
 
                       @file_put_contents('../../storage/logs/installer_debug.log',
-                        date('Y-m-d H:i:s') . " - After flush, starting foreach\n",
+                        date('Y-m-d H:i:s') . " - [19] Using mysql CLI for faster import\n",
                         FILE_APPEND
                       );
 
-                      $query_count = 0;
-                      $error_count = 0;
+                      // Usar mysql CLI que é muito mais rápido
                       $start_time = time();
-
+                      
+                      // Construir comando mysql
+                      $mysql_cmd = sprintf(
+                        "mysql -h%s -u%s -p%s %s < %s 2>&1",
+                        escapeshellarg($db_host),
+                        escapeshellarg($db_user),
+                        escapeshellarg($db_pass),
+                        escapeshellarg($db_name),
+                        escapeshellarg($temp_sql)
+                      );
+                      
                       @file_put_contents('../../storage/logs/installer_debug.log',
-                        date('Y-m-d H:i:s') . " - Variables initialized, entering foreach loop\n",
+                        date('Y-m-d H:i:s') . " - [20] Executing mysql command\n",
                         FILE_APPEND
                       );
-
-                      foreach($queries as $query) {
-                        if(empty($query)) continue;
-
-                        // Log apenas as 3 primeiras queries
-                        if($query_count < 3) {
-                          @file_put_contents('../../storage/logs/installer_debug.log',
-                            date('Y-m-d H:i:s') . " - Query #" . ($query_count + 1) . " starting: " . substr($query, 0, 80) . "...\n",
-                            FILE_APPEND
-                          );
-                        }
-
-                        $result = @mysqli_query($con, $query);
-
-                        if($query_count < 3) {
-                          @file_put_contents('../../storage/logs/installer_debug.log',
-                            date('Y-m-d H:i:s') . " - Query #" . ($query_count + 1) . " executed: " . ($result ? "OK" : "FAIL") . "\n",
-                            FILE_APPEND
-                          );
-                        }
-
-                        $query_count++;
-
-                        if(!$result && mysqli_error($con)) {
-                          $error_count++;
-                          // Log apenas os primeiros 5 erros
-                          if($error_count <= 5) {
-                            @file_put_contents('../../storage/logs/installer_debug.log',
-                              date('Y-m-d H:i:s') . " - Error at query $query_count: " . mysqli_error($con) . "\n",
-                              FILE_APPEND
-                            );
-                          }
-                        }
-
-                        // Update progress every 10 queries (mudei de 50 para 10 para debug)
-                        if($query_count % 10 == 0) {
-                          $elapsed = time() - $start_time;
-                          $progress_percent = round(($query_count / $total_queries) * 100);
-                          echo "<script>updateProgress('Progress: $query_count / $total_queries queries ($progress_percent%) - {$elapsed}s elapsed');</script>";
-                          if(ob_get_level() > 0) @ob_flush();
-                          flush();
-
-                          @file_put_contents('../../storage/logs/installer_debug.log',
-                            date('Y-m-d H:i:s') . " - Progress: $query_count/$total_queries ({$progress_percent}%) - {$elapsed}s\n",
-                            FILE_APPEND
-                          );
-                        }
-                      }
-
+                      
+                      echo "<script>updateProgress('Importing via MySQL CLI...');</script>";
+                      if(ob_get_level() > 0) @ob_flush();
+                      flush();
+                      
+                      $output = [];
+                      $return_var = 0;
+                      exec($mysql_cmd, $output, $return_var);
+                      
                       $total_time = time() - $start_time;
+                      
                       @file_put_contents('../../storage/logs/installer_debug.log',
-                        date('Y-m-d H:i:s') . " - Import completed: $query_count queries, $error_count errors, {$total_time}s total\n",
+                        date('Y-m-d H:i:s') . " - [21] MySQL CLI completed in {$total_time}s, return code: $return_var\n",
                         FILE_APPEND
                       );
+                      
+                      if($return_var !== 0) {
+                        $error_msg = implode("\n", $output);
+                        @file_put_contents('../../storage/logs/installer_debug.log',
+                          date('Y-m-d H:i:s') . " - [ERROR] Import failed: $error_msg\n",
+                          FILE_APPEND
+                        );
+                        echo "<div class='notification is-danger'>Import Error: $error_msg</div>";
+                        exit;
+                      }
+                      
+                      @file_put_contents('../../storage/logs/installer_debug.log',
+                        date('Y-m-d H:i:s') . " - [22] Import successful, took {$total_time}s\n",
+                        FILE_APPEND
+                      );
+
+                      // Limpar arquivo temporário
+                      @unlink($temp_sql);
 
                       // Reabilitar checks
                       mysqli_query($con, "SET FOREIGN_KEY_CHECKS=1");
 
                       @file_put_contents('../../storage/logs/installer_debug.log',
-                        date('Y-m-d H:i:s') . " - Settings updated, showing success form\n",
+                        date('Y-m-d H:i:s') . " - [23] FOREIGN_KEY_CHECKS restored, showing success form\n",
                         FILE_APPEND
                       );
+                      
+                      echo "<script>updateProgress('Import completed in {$total_time}s!');</script>";
+                      if(ob_get_level() > 0) @ob_flush();
+                      flush();
+                      sleep(1); // Pequena pausa para mostrar mensagem
 
                       ?>
                     <form action="index.php?step=2" method="POST">
-                      <div class='notification is-success'>Database was Successfully Imported.</div>
+                      <div class='notification is-success'>Database was Successfully Imported in <?php echo $total_time; ?> seconds!</div>
                       <input type="hidden" name="dbscs" id="dbscs" value="true">
                       <div class="mt-15" style='text-align: center;'>
                         <button type="submit" class="button is-link">NEXT <i class="fa-solid fa-arrow-right pl-10"></i></button>

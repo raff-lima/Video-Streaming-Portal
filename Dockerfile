@@ -14,7 +14,9 @@ RUN apk add --no-cache \
     mysql-client \
     bash \
     git \
-    netcat-openbsd
+    netcat-openbsd \
+    icu-dev \
+    icu-data-full
 
 # Instalar extensões PHP necessárias
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \

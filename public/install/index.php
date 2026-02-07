@@ -582,51 +582,85 @@ PAYPAL_LIVE_CLIENT_SECRET=
                       if(ob_get_level() > 0) @ob_flush();
                       flush();
 
-                      @file_put_contents('../../storage/logs/installer_debug.log',
-                        date('Y-m-d H:i:s') . " - [19] Using mariadb CLI for faster import\n",
-                        FILE_APPEND
-                      );
-
-                      // Usar mysql CLI que é muito mais rápido
                       $start_time = time();
-
-                      // Construir comando mariadb com default-auth para MySQL 8 compatibility
-                      $mysql_cmd = sprintf(
-                        "mariadb --skip-ssl --default-auth=mysql_native_password -h%s -u%s -p%s %s < %s 2>&1",
-                        escapeshellarg($db_host),
-                        escapeshellarg($db_user),
-                        escapeshellarg($db_pass),
-                        escapeshellarg($db_name),
-                        escapeshellarg($temp_sql)
-                      );
+                      $total_time = 0;
 
                       @file_put_contents('../../storage/logs/installer_debug.log',
-                        date('Y-m-d H:i:s') . " - [20] Executing mariadb with --default-auth=mysql_native_password\n",
+                        date('Y-m-d H:i:s') . " - [19] Creating temp user with mysql_native_password\n",
                         FILE_APPEND
                       );
 
-                      echo "<script>updateProgress('Importing via MariaDB CLI...');</script>";
-                      if(ob_get_level() > 0) @ob_flush();
-                      flush();
+                      // Criar usuário temporário com mysql_native_password para MariaDB CLI
+                      $temp_user = 'installer_temp_' . substr(md5(time()), 0, 8);
+                      $temp_pass = bin2hex(random_bytes(16));
 
-                      $output = [];
-                      $return_var = 0;
-                      exec($mysql_cmd, $output, $return_var);
+                      $create_user = "CREATE USER IF NOT EXISTS '{$temp_user}'@'%' IDENTIFIED WITH mysql_native_password BY '{$temp_pass}'";
+                      $grant_privs = "GRANT ALL PRIVILEGES ON `{$db_name}`.* TO '{$temp_user}'@'%'";
+                      $flush_privs = "FLUSH PRIVILEGES";
 
-                      $total_time = time() - $start_time;
-
-                      @file_put_contents('../../storage/logs/installer_debug.log',
-                        date('Y-m-d H:i:s') . " - [21] MariaDB CLI completed in {$total_time}s, return code: $return_var\n",
-                        FILE_APPEND
-                      );
-
-                      if($return_var !== 0) {
-                        $error_msg = implode("\n", $output);
+                      if(mysqli_query($con, $create_user) && mysqli_query($con, $grant_privs) && mysqli_query($con, $flush_privs)) {
                         @file_put_contents('../../storage/logs/installer_debug.log',
-                          date('Y-m-d H:i:s') . " - [ERROR] MariaDB CLI failed: $error_msg\n",
+                          date('Y-m-d H:i:s') . " - [20] Temp user created: $temp_user\n",
                           FILE_APPEND
                         );
 
+                        // Construir comando mariadb usando usuário temporário
+                        $mysql_cmd = sprintf(
+                          "mariadb --skip-ssl -h%s -u%s -p%s %s < %s 2>&1",
+                          escapeshellarg($db_host),
+                          escapeshellarg($temp_user),
+                          escapeshellarg($temp_pass),
+                          escapeshellarg($db_name),
+                          escapeshellarg($temp_sql)
+                        );
+
+                        @file_put_contents('../../storage/logs/installer_debug.log',
+                          date('Y-m-d H:i:s') . " - [21] Executing mariadb with temp user\n",
+                          FILE_APPEND
+                        );
+
+                        echo "<script>updateProgress('Importing via MariaDB CLI...');</script>";
+                        if(ob_get_level() > 0) @ob_flush();
+                        flush();
+
+                        $output = [];
+                        $return_var = 0;
+                        exec($mysql_cmd, $output, $return_var);
+
+                        $total_time = time() - $start_time;
+
+                        // Limpar usuário temporário
+                        mysqli_query($con, "DROP USER IF EXISTS '{$temp_user}'@'%'");
+
+                        @file_put_contents('../../storage/logs/installer_debug.log',
+                          date('Y-m-d H:i:s') . " - [22] MariaDB CLI completed in {$total_time}s, return code: $return_var, temp user dropped\n",
+                          FILE_APPEND
+                        );
+
+                        if($return_var !== 0) {
+                          $error_msg = implode("\n", $output);
+                          @file_put_contents('../../storage/logs/installer_debug.log',
+                            date('Y-m-d H:i:s') . " - [ERROR] MariaDB CLI failed even with temp user: $error_msg\n",
+                            FILE_APPEND
+                          );
+                          // Continua para fallback abaixo
+                        } else {
+                          // Sucesso! Pula o fallback
+                          @file_put_contents('../../storage/logs/installer_debug.log',
+                            date('Y-m-d H:i:s') . " - [23] Import successful via CLI, took {$total_time}s\n",
+                            FILE_APPEND
+                          );
+                          $return_var = 0; // Garante que não entra no fallback
+                        }
+                      } else {
+                        @file_put_contents('../../storage/logs/installer_debug.log',
+                          date('Y-m-d H:i:s') . " - [ERROR] Failed to create temp user: " . mysqli_error($con) . "\n",
+                          FILE_APPEND
+                        );
+                        $return_var = 1; // Força fallback
+                      }
+
+                      if($return_var !== 0) {
                         // Fallback para mysqli query-by-query
                         @file_put_contents('../../storage/logs/installer_debug.log',
                           date('Y-m-d H:i:s') . " - [24] Falling back to mysqli method\n",

@@ -5,6 +5,24 @@ echo "==================================="
 echo "Video Streaming Portal - Iniciando"
 echo "==================================="
 
+# Criar arquivo .env se não existir (Coolify injeta vars como ENV, não arquivo)
+if [ ! -f /var/www/html/.env ]; then
+    echo "Criando arquivo .env a partir das variáveis de ambiente..."
+    if [ -f /var/www/html/.env.example ]; then
+        cp /var/www/html/.env.example /var/www/html/.env
+    else
+        # Criar .env mínimo - Laravel usará variáveis de ambiente do sistema
+        cat > /var/www/html/.env << 'EOF'
+APP_NAME="Video Streaming Portal"
+APP_ENV=production
+APP_KEY=
+APP_DEBUG=false
+APP_URL=http://localhost
+EOF
+    fi
+    echo "✓ Arquivo .env criado!"
+fi
+
 # Aguardar banco de dados estar pronto
 if [ -n "$DB_HOST" ]; then
     echo "Aguardando banco de dados em $DB_HOST:$DB_PORT..."

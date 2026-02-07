@@ -493,53 +493,159 @@ PAYPAL_LIVE_CLIENT_SECRET=
                       }
 
                       // Mostrar progresso na tela
+                      @file_put_contents('../../storage/logs/installer_debug.log',
+                        date('Y-m-d H:i:s') . " - [1] Starting HTML output\n",
+                        FILE_APPEND
+                      );
+                      
                       echo "<div class='notification is-info'>Importing database... This may take a minute.</div>";
                       echo "<div id='progress'>Starting import...</div>";
                       echo "<script>function updateProgress(msg) { document.getElementById('progress').innerHTML = msg; }</script>";
                       if(ob_get_level() > 0) @ob_flush();
                       flush();
 
+                      @file_put_contents('../../storage/logs/installer_debug.log',
+                        date('Y-m-d H:i:s') . " - [2] HTML output done, setting MySQL variables\n",
+                        FILE_APPEND
+                      );
+
                       // Desabilitar checks para importação mais rápida
                       mysqli_query($con, "SET FOREIGN_KEY_CHECKS=0");
+                      @file_put_contents('../../storage/logs/installer_debug.log', date('Y-m-d H:i:s') . " - [3] SET FOREIGN_KEY_CHECKS done\n", FILE_APPEND);
+                      
                       mysqli_query($con, "SET SQL_MODE='NO_AUTO_VALUE_ON_ZERO'");
+                      @file_put_contents('../../storage/logs/installer_debug.log', date('Y-m-d H:i:s') . " - [4] SET SQL_MODE done\n", FILE_APPEND);
+                      
                       mysqli_query($con, "SET time_zone = '+00:00'");
+                      @file_put_contents('../../storage/logs/installer_debug.log', date('Y-m-d H:i:s') . " - [5] SET time_zone done\n", FILE_APPEND);
+                      
                       mysqli_query($con, "SET wait_timeout=600");
+                      @file_put_contents('../../storage/logs/installer_debug.log', date('Y-m-d H:i:s') . " - [6] SET wait_timeout done\n", FILE_APPEND);
+                      
                       mysqli_query($con, "SET interactive_timeout=600");
+                      @file_put_contents('../../storage/logs/installer_debug.log', date('Y-m-d H:i:s') . " - [7] SET interactive_timeout done\n", FILE_APPEND);
+                      
                       mysqli_query($con, "SET net_read_timeout=600");
+                      @file_put_contents('../../storage/logs/installer_debug.log', date('Y-m-d H:i:s') . " - [8] SET net_read_timeout done\n", FILE_APPEND);
+                      
                       mysqli_query($con, "SET net_write_timeout=600");
+                      @file_put_contents('../../storage/logs/installer_debug.log', date('Y-m-d H:i:s') . " - [9] SET net_write_timeout done\n", FILE_APPEND);
 
                       // Ler arquivo SQL completo
-                      $sql_content = file_get_contents($filename);
                       @file_put_contents('../../storage/logs/installer_debug.log',
-                        date('Y-m-d H:i:s') . " - SQL file loaded, " . strlen($sql_content) . " bytes\n",
+                        date('Y-m-d H:i:s') . " - [10] Before file_get_contents\n",
+                        FILE_APPEND
+                      );
+                      
+                      $sql_content = file_get_contents($filename);
+                      
+                      @file_put_contents('../../storage/logs/installer_debug.log',
+                        date('Y-m-d H:i:s') . " - [11] SQL file loaded, " . strlen($sql_content) . " bytes\n",
                         FILE_APPEND
                       );
 
                       // Remover comentários e linhas vazias
+                      @file_put_contents('../../storage/logs/installer_debug.log',
+                        date('Y-m-d H:i:s') . " - [12] Before preg_replace (comments)\n",
+                        FILE_APPEND
+                      );
+                      
                       $sql_content = preg_replace('/^--.*$/m', '', $sql_content);
+                      
+                      @file_put_contents('../../storage/logs/installer_debug.log',
+                        date('Y-m-d H:i:s') . " - [13] After preg_replace comments, before empty lines\n",
+                        FILE_APPEND
+                      );
+                      
                       $sql_content = preg_replace('/^\s*$/m', '', $sql_content);
+                      
+                      @file_put_contents('../../storage/logs/installer_debug.log',
+                        date('Y-m-d H:i:s') . " - [14] After preg_replace empty lines\n",
+                        FILE_APPEND
+                      );
 
                       // Dividir em queries
-                      $queries = array_filter(array_map('trim', explode(';', $sql_content)));
+                      @file_put_contents('../../storage/logs/installer_debug.log',
+                        date('Y-m-d H:i:s') . " - [15] Before explode\n",
+                        FILE_APPEND
+                      );
+                      
+                      $queries = explode(';', $sql_content);
+                      
+                      @file_put_contents('../../storage/logs/installer_debug.log',
+                        date('Y-m-d H:i:s') . " - [16] After explode, before array_map\n",
+                        FILE_APPEND
+                      );
+                      
+                      $queries = array_map('trim', $queries);
+                      
+                      @file_put_contents('../../storage/logs/installer_debug.log',
+                        date('Y-m-d H:i:s') . " - [17] After array_map, before array_filter\n",
+                        FILE_APPEND
+                      );
+                      
+                      $queries = array_filter($queries);
                       $total_queries = count($queries);
+                      
+                      @file_put_contents('../../storage/logs/installer_debug.log',
+                        date('Y-m-d H:i:s') . " - [18] After array_filter, total: $total_queries\n",
+                        FILE_APPEND
+                      );
 
                       @file_put_contents('../../storage/logs/installer_debug.log',
                         date('Y-m-d H:i:s') . " - Processing $total_queries queries\n",
                         FILE_APPEND
                       );
 
+                      @file_put_contents('../../storage/logs/installer_debug.log',
+                        date('Y-m-d H:i:s') . " - Before echo updateProgress\n",
+                        FILE_APPEND
+                      );
+
                       echo "<script>updateProgress('Executing $total_queries SQL queries...');</script>";
+
+                      @file_put_contents('../../storage/logs/installer_debug.log',
+                        date('Y-m-d H:i:s') . " - After echo, before flush\n",
+                        FILE_APPEND
+                      );
+
                       if(ob_get_level() > 0) @ob_flush();
                       flush();
+
+                      @file_put_contents('../../storage/logs/installer_debug.log',
+                        date('Y-m-d H:i:s') . " - After flush, starting foreach\n",
+                        FILE_APPEND
+                      );
 
                       $query_count = 0;
                       $error_count = 0;
                       $start_time = time();
 
+                      @file_put_contents('../../storage/logs/installer_debug.log',
+                        date('Y-m-d H:i:s') . " - Variables initialized, entering foreach loop\n",
+                        FILE_APPEND
+                      );
+
                       foreach($queries as $query) {
                         if(empty($query)) continue;
 
+                        // Log apenas as 3 primeiras queries
+                        if($query_count < 3) {
+                          @file_put_contents('../../storage/logs/installer_debug.log',
+                            date('Y-m-d H:i:s') . " - Query #" . ($query_count + 1) . " starting: " . substr($query, 0, 80) . "...\n",
+                            FILE_APPEND
+                          );
+                        }
+
                         $result = @mysqli_query($con, $query);
+
+                        if($query_count < 3) {
+                          @file_put_contents('../../storage/logs/installer_debug.log',
+                            date('Y-m-d H:i:s') . " - Query #" . ($query_count + 1) . " executed: " . ($result ? "OK" : "FAIL") . "\n",
+                            FILE_APPEND
+                          );
+                        }
+
                         $query_count++;
 
                         if(!$result && mysqli_error($con)) {
@@ -553,14 +659,14 @@ PAYPAL_LIVE_CLIENT_SECRET=
                           }
                         }
 
-                        // Update progress every 50 queries
-                        if($query_count % 50 == 0) {
+                        // Update progress every 10 queries (mudei de 50 para 10 para debug)
+                        if($query_count % 10 == 0) {
                           $elapsed = time() - $start_time;
                           $progress_percent = round(($query_count / $total_queries) * 100);
                           echo "<script>updateProgress('Progress: $query_count / $total_queries queries ($progress_percent%) - {$elapsed}s elapsed');</script>";
                           if(ob_get_level() > 0) @ob_flush();
                           flush();
-                          
+
                           @file_put_contents('../../storage/logs/installer_debug.log',
                             date('Y-m-d H:i:s') . " - Progress: $query_count/$total_queries ({$progress_percent}%) - {$elapsed}s\n",
                             FILE_APPEND

@@ -18,5 +18,4 @@ phpunit.xml
 .editorconfig
 README.md
 Documentation
-public/install
 tests

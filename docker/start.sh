@@ -54,11 +54,21 @@ php artisan migrate --force || echo "⚠ Migrations já executadas ou erro"
 echo "Criando link simbólico para storage..."
 php artisan storage:link || echo "⚠ Link já existe"
 
-# Limpar e cachear configurações
-echo "Otimizando aplicação..."
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
+# Verificar se já foi instalado antes de fazer cache
+if [ -f /var/www/html/storage/installed ]; then
+    # Limpar e cachear configurações APENAS se já instalado
+    echo "Otimizando aplicação..."
+    php artisan config:cache
+    php artisan route:cache
+    php artisan view:cache
+else
+    # Se não instalado, limpar cache para permitir instalador funcionar
+    echo "Aplicação não instalada - limpando cache..."
+    php artisan config:clear || true
+    php artisan route:clear || true
+    php artisan view:clear || true
+    php artisan cache:clear || true
+fi
 
 # Garantir permissões corretas
 echo "Configurando permissões..."

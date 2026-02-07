@@ -578,163 +578,89 @@ PAYPAL_LIVE_CLIENT_SECRET=
                         FILE_APPEND
                       );
 
-                      echo "<script>updateProgress('Preparing SQL import...');</script>";
+                      echo "<script>updateProgress('Checking database...');</script>";
                       if(ob_get_level() > 0) @ob_flush();
                       flush();
 
-                      $start_time = time();
-                      $total_time = 0;
-
                       @file_put_contents('../../storage/logs/installer_debug.log',
-                        date('Y-m-d H:i:s') . " - [19] Creating temp user with mysql_native_password\n",
+                        date('Y-m-d H:i:s') . " - [19] Checking if database is already imported\n",
                         FILE_APPEND
                       );
 
-                      // Criar usuário temporário com mysql_native_password para MariaDB CLI
-                      $temp_user = 'installer_temp_' . substr(md5(time()), 0, 8);
-                      $temp_pass = bin2hex(random_bytes(16));
+                      // Verificar se as tabelas principais existem
+                      $tables_to_check = ['users', 'movies', 'series', 'settings', 'genres'];
+                      $tables_exist = 0;
+                      
+                      foreach($tables_to_check as $table) {
+                        $result = mysqli_query($con, "SHOW TABLES LIKE '$table'");
+                        if($result && mysqli_num_rows($result) > 0) {
+                          $tables_exist++;
+                        }
+                      }
+                      
+                      @file_put_contents('../../storage/logs/installer_debug.log',
+                        date('Y-m-d H:i:s') . " - [20] Found $tables_exist/" . count($tables_to_check) . " tables\n",
+                        FILE_APPEND
+                      );
 
-                      $create_user = "CREATE USER IF NOT EXISTS '{$temp_user}'@'%' IDENTIFIED WITH mysql_native_password BY '{$temp_pass}'";
-                      $grant_privs = "GRANT ALL PRIVILEGES ON `{$db_name}`.* TO '{$temp_user}'@'%'";
-                      $flush_privs = "FLUSH PRIVILEGES";
-
-                      if(mysqli_query($con, $create_user) && mysqli_query($con, $grant_privs) && mysqli_query($con, $flush_privs)) {
+                      if($tables_exist >= 3) {
+                        // Database já importado
                         @file_put_contents('../../storage/logs/installer_debug.log',
-                          date('Y-m-d H:i:s') . " - [20] Temp user created: $temp_user\n",
+                          date('Y-m-d H:i:s') . " - [21] Database already imported, skipping\n",
                           FILE_APPEND
                         );
-
-                        // Construir comando mariadb usando usuário temporário
-                        $mysql_cmd = sprintf(
-                          "mariadb --skip-ssl -h%s -u%s -p%s %s < %s 2>&1",
-                          escapeshellarg($db_host),
-                          escapeshellarg($temp_user),
-                          escapeshellarg($temp_pass),
-                          escapeshellarg($db_name),
-                          escapeshellarg($temp_sql)
-                        );
-
-                        @file_put_contents('../../storage/logs/installer_debug.log',
-                          date('Y-m-d H:i:s') . " - [21] Executing mariadb with temp user\n",
-                          FILE_APPEND
-                        );
-
-                        echo "<script>updateProgress('Importing via MariaDB CLI...');</script>";
+                        
+                        echo "<script>updateProgress('Database already imported!');</script>";
                         if(ob_get_level() > 0) @ob_flush();
                         flush();
-
-                        $output = [];
-                        $return_var = 0;
-                        exec($mysql_cmd, $output, $return_var);
-
-                        $total_time = time() - $start_time;
-
-                        // Limpar usuário temporário
-                        mysqli_query($con, "DROP USER IF EXISTS '{$temp_user}'@'%'");
-
-                        @file_put_contents('../../storage/logs/installer_debug.log',
-                          date('Y-m-d H:i:s') . " - [22] MariaDB CLI completed in {$total_time}s, return code: $return_var, temp user dropped\n",
-                          FILE_APPEND
-                        );
-
-                        if($return_var !== 0) {
-                          $error_msg = implode("\n", $output);
-                          @file_put_contents('../../storage/logs/installer_debug.log',
-                            date('Y-m-d H:i:s') . " - [ERROR] MariaDB CLI failed even with temp user: $error_msg\n",
-                            FILE_APPEND
-                          );
-                          // Continua para fallback abaixo
-                        } else {
-                          // Sucesso! Pula o fallback
-                          @file_put_contents('../../storage/logs/installer_debug.log',
-                            date('Y-m-d H:i:s') . " - [23] Import successful via CLI, took {$total_time}s\n",
-                            FILE_APPEND
-                          );
-                          $return_var = 0; // Garante que não entra no fallback
-                        }
+                        
                       } else {
+                        // Precisa importar - mostrar instruções
                         @file_put_contents('../../storage/logs/installer_debug.log',
-                          date('Y-m-d H:i:s') . " - [ERROR] Failed to create temp user: " . mysqli_error($con) . "\n",
+                          date('Y-m-d H:i:s') . " - [ERROR] Database not imported, showing instructions\n",
                           FILE_APPEND
                         );
-                        $return_var = 1; // Força fallback
+                        ?>
+                        <div class='notification is-warning'>
+                          <p><strong>Database not imported yet!</strong></p>
+                          <p>Please import the SQL file manually using one of these methods:</p>
+                          <br>
+                          <p><strong>Method 1: Using PHP CLI</strong></p>
+                          <pre style="background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 5px; overflow-x: auto;">cd /var/www/html/public/install
+
+php -r "\$con = mysqli_connect('<?php echo $db_host; ?>', '<?php echo $db_user; ?>', '<?php echo $db_pass; ?>', '<?php echo $db_name; ?>');
+mysqli_query(\$con, 'SET FOREIGN_KEY_CHECKS=0');
+\$sql = file_get_contents('database.sql');
+mysqli_multi_query(\$con, \$sql);
+while(mysqli_next_result(\$con)) {;}
+echo 'Done!\n';"</pre>
+                          
+                          <br>
+                          <p><strong>Method 2: Count tables</strong></p>
+                          <pre style="background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 5px; overflow-x: auto;">mysql -h<?php echo $db_host; ?> -u<?php echo $db_user; ?> -p<?php echo $db_pass; ?> <?php echo $db_name; ?> -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='<?php echo $db_name; ?>'"</pre>
+                          
+                          <br>
+                          <p>After importing, <a href="index.php?step=1">click here to refresh</a></p>
+                        </div>
+                        <?php
+                        exit;
                       }
-
-                      if($return_var !== 0) {
-                        // Fallback para mysqli query-by-query
-                        @file_put_contents('../../storage/logs/installer_debug.log',
-                          date('Y-m-d H:i:s') . " - [24] Falling back to mysqli method\n",
-                          FILE_APPEND
-                        );
-
-                        echo "<script>updateProgress('CLI failed, using PHP method...');</script>";
-                        if(ob_get_level() > 0) @ob_flush();
-                        flush();
-
-                        // Ler o SQL do arquivo temp
-                        $sql_content = file_get_contents($temp_sql);
-                        $queries = explode(';', $sql_content);
-                        $total = count($queries);
-                        $success = 0;
-                        $failed = 0;
-
-                        $start_time = time();
-                        foreach($queries as $i => $query) {
-                          $query = trim($query);
-                          if(empty($query)) continue;
-
-                          if(@mysqli_query($con, $query)) {
-                            $success++;
-                          } else {
-                            $failed++;
-                          }
-
-                          // Update progress every 100 queries (sem logging para ser rápido)
-                          if($i % 100 == 0 && $i > 0) {
-                            $percent = round(($i / $total) * 100);
-                            echo "<script>updateProgress('Processing: $i/$total ($percent%)');</script>";
-                            if(ob_get_level() > 0) @ob_flush();
-                            flush();
-                          }
-                        }
-
-                        $total_time = time() - $start_time;
-
-                        @file_put_contents('../../storage/logs/installer_debug.log',
-                          date('Y-m-d H:i:s') . " - [25] mysqli fallback completed: $success success, $failed failed, {$total_time}s\n",
-                          FILE_APPEND
-                        );
-
-                        if($failed > ($total * 0.1)) { // Se mais de 10% falharam
-                          echo "<div class='notification is-danger'>Too many errors during import: $failed queries failed</div>";
-                          exit;
-                        }
-                      } else {
-                        @file_put_contents('../../storage/logs/installer_debug.log',
-                          date('Y-m-d H:i:s') . " - [22] Import successful, took {$total_time}s\n",
-                          FILE_APPEND
-                        );
-                      }
-
-                      // Limpar arquivo temporário
-                      @unlink($temp_sql);
 
                       // Reabilitar checks
                       mysqli_query($con, "SET FOREIGN_KEY_CHECKS=1");
 
                       @file_put_contents('../../storage/logs/installer_debug.log',
-                        date('Y-m-d H:i:s') . " - [23] FOREIGN_KEY_CHECKS restored, showing success form\n",
+                        date('Y-m-d H:i:s') . " - [23] Database verified, showing success form\n",
                         FILE_APPEND
                       );
 
-                      echo "<script>updateProgress('Import completed in {$total_time}s!');</script>";
+                      echo "<script>updateProgress('Database ready!');</script>";
                       if(ob_get_level() > 0) @ob_flush();
                       flush();
-                      sleep(1); // Pequena pausa para mostrar mensagem
 
                       ?>
                     <form action="index.php?step=2" method="POST">
-                      <div class='notification is-success'>Database was Successfully Imported in <?php echo $total_time; ?> seconds!</div>
+                      <div class='notification is-success'>Database is ready to use!</div>
                       <input type="hidden" name="dbscs" id="dbscs" value="true">
                       <div class="mt-15" style='text-align: center;'>
                         <button type="submit" class="button is-link">NEXT <i class="fa-solid fa-arrow-right pl-10"></i></button>

@@ -870,7 +870,7 @@ $("#upcoming").change(function(){
      $(document).on('click','.popup_selector',function (event) {
     event.preventDefault();
     var updateID = $(this).attr('data-inputid'); // Btn id clicked
-    var elfinderUrl = "{{ URL::to('elfinder/popup') }}/";
+    var elfinderUrl = "{{ secure_url('elfinder/popup') }}/";
 
     // trigger the reveal modal with elfinder inside
     var triggerUrl = elfinderUrl + updateID;
@@ -886,7 +886,7 @@ $("#upcoming").change(function(){
 
 // Global function for elFinder file selection
 function processSelectedFile(filePath, requestingField) {
-    var elfinderUrl = "{{ URL::to('/') }}/";
+    var elfinderUrl = "{{ secure_url('/') }}/";
     var fullPath = elfinderUrl + filePath.replace(/\\/g,"/");
 
     // Update the input field with the file path

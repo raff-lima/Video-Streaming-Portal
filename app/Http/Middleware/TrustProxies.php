@@ -12,7 +12,7 @@ class TrustProxies extends Middleware
      *
      * @var array<int, string>|string|null
      */
-    protected $proxies;
+    protected $proxies = '*'; // Trust all proxies (Coolify/Docker environment)
 
     /**
      * The headers that should be used to detect proxies.

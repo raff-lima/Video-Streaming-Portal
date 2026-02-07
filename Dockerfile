@@ -1,0 +1,73 @@
+FROM php:8.2-fpm-alpine
+
+# Instalar dependências do sistema
+RUN apk add --no-cache \
+    nginx \
+    supervisor \
+    curl \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    zip \
+    libzip-dev \
+    oniguruma-dev \
+    mysql-client \
+    bash \
+    git \
+    netcat-openbsd
+
+# Instalar extensões PHP necessárias
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) \
+        pdo_mysql \
+        mysqli \
+        mbstring \
+        zip \
+        exif \
+        pcntl \
+        bcmath \
+        gd \
+        intl
+
+# Instalar Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Configurar diretório de trabalho
+WORKDIR /var/www/html
+
+# Copiar arquivos do projeto
+COPY . .
+
+# Configurar permissões
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html/storage \
+    && chmod -R 755 /var/www/html/bootstrap/cache
+
+# Instalar dependências do Composer (sem dev)
+RUN composer install --no-dev --optimize-autoloader --no-interaction
+
+# Configurar PHP
+RUN echo "upload_max_filesize = 100M" >> /usr/local/etc/php/conf.d/uploads.ini && \
+    echo "post_max_size = 100M" >> /usr/local/etc/php/conf.d/uploads.ini && \
+    echo "memory_limit = 256M" >> /usr/local/etc/php/conf.d/uploads.ini
+
+# Configurar Nginx
+COPY docker/nginx.conf /etc/nginx/nginx.conf
+COPY docker/default.conf /etc/nginx/http.d/default.conf
+
+# Configurar Supervisor
+COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Script de inicialização
+COPY docker/start.sh /start.sh
+RUN chmod +x /start.sh
+
+# Criar diretórios necessários
+RUN mkdir -p /var/log/supervisor \
+    && mkdir -p /run/nginx
+
+# Expor porta 80
+EXPOSE 80
+
+# Comando de inicialização
+CMD ["/start.sh"]

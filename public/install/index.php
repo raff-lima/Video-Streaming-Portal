@@ -3,6 +3,11 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+// Increase limits for SQL import
+set_time_limit(300); // 5 minutes
+ini_set('memory_limit', '512M');
+ini_set('max_execution_time', '300');
+
 session_start();
 
 // Bypass verificação de licença para instalação
@@ -304,29 +309,29 @@ function getBaseUrl() {
                 </div>
                 <?php
                   // DEBUG: Log para verificar o que está acontecendo
-                  @file_put_contents('../../storage/logs/installer_debug.log', 
-                    date('Y-m-d H:i:s') . " - Step 1 reached\n" . 
-                    "POST data: " . print_r($_POST, true) . "\n", 
+                  @file_put_contents('../../storage/logs/installer_debug.log',
+                    date('Y-m-d H:i:s') . " - Step 1 reached\n" .
+                    "POST data: " . print_r($_POST, true) . "\n",
                     FILE_APPEND
                   );
-                  
+
                   if($_POST && isset($_POST["lcscs"])){
-                    @file_put_contents('../../storage/logs/installer_debug.log', 
-                      date('Y-m-d H:i:s') . " - Inside POST condition\n", 
+                    @file_put_contents('../../storage/logs/installer_debug.log',
+                      date('Y-m-d H:i:s') . " - Inside POST condition\n",
                       FILE_APPEND
                     );
-                    
+
                     $valid = strip_tags(trim($_POST["lcscs"]));
                     $db_host = strip_tags(trim($_POST["host"]));
                     $db_user = strip_tags(trim($_POST["user"]));
                     $db_pass = strip_tags(trim($_POST["pass"]));
                     $db_name = strip_tags(trim($_POST["name"]));
-                    
-                    @file_put_contents('../../storage/logs/installer_debug.log', 
-                      date('Y-m-d H:i:s') . " - DB Config: Host=$db_host, User=$db_user, DB=$db_name\n", 
+
+                    @file_put_contents('../../storage/logs/installer_debug.log',
+                      date('Y-m-d H:i:s') . " - DB Config: Host=$db_host, User=$db_user, DB=$db_name\n",
                       FILE_APPEND
                     );
-                    
+
                     // Let's import the sql file into the given database
                     if(!empty($db_host)){
 
@@ -418,9 +423,9 @@ PAYPAL_LIVE_CLIENT_SECRET=
 ";
                       fwrite($myfile, $txt);
                       fclose($myfile);
-                      
-                      @file_put_contents('../../storage/logs/installer_debug.log', 
-                        date('Y-m-d H:i:s') . " - .env file written, attempting DB connection\n", 
+
+                      @file_put_contents('../../storage/logs/installer_debug.log',
+                        date('Y-m-d H:i:s') . " - .env file written, attempting DB connection\n",
                         FILE_APPEND
                       );
 
@@ -428,9 +433,9 @@ PAYPAL_LIVE_CLIENT_SECRET=
 
                       mysqli_query($con,"SET NAMES 'utf8'");
 
-                      if(mysqli_connect_errno()){ 
-                        @file_put_contents('../../storage/logs/installer_debug.log', 
-                          date('Y-m-d H:i:s') . " - DB Connection FAILED: " . mysqli_connect_error() . "\n", 
+                      if(mysqli_connect_errno()){
+                        @file_put_contents('../../storage/logs/installer_debug.log',
+                          date('Y-m-d H:i:s') . " - DB Connection FAILED: " . mysqli_connect_error() . "\n",
                           FILE_APPEND
                         );
                         ?>
@@ -467,41 +472,63 @@ PAYPAL_LIVE_CLIENT_SECRET=
                         </form><?php
                         exit;
                       }
-                      
-                      @file_put_contents('../../storage/logs/installer_debug.log', 
-                        date('Y-m-d H:i:s') . " - DB Connected successfully, importing SQL file: $filename\n", 
+
+                      @file_put_contents('../../storage/logs/installer_debug.log',
+                        date('Y-m-d H:i:s') . " - DB Connected successfully, importing SQL file: $filename\n",
                         FILE_APPEND
                       );
-                      
+
                       if(!file_exists($filename)) {
-                        @file_put_contents('../../storage/logs/installer_debug.log', 
-                          date('Y-m-d H:i:s') . " - ERROR: SQL file not found: $filename\n", 
+                        @file_put_contents('../../storage/logs/installer_debug.log',
+                          date('Y-m-d H:i:s') . " - ERROR: SQL file not found: $filename\n",
                           FILE_APPEND
                         );
                         echo "<div class='notification is-danger'>Error: database.sql file not found!</div>";
                         exit;
                       }
-                      
+
                       $templine = '';
                       $lines = file($filename);
-                      @file_put_contents('../../storage/logs/installer_debug.log', 
-                        date('Y-m-d H:i:s') . " - SQL file loaded, " . count($lines) . " lines found\n", 
+                      @file_put_contents('../../storage/logs/installer_debug.log',
+                        date('Y-m-d H:i:s') . " - SQL file loaded, " . count($lines) . " lines found\n",
                         FILE_APPEND
                       );
-                      
-                      foreach($lines as $line){
+
+                      $query_count = 0;
+                      $error_count = 0;
+
+                      foreach($lines as $line_num => $line){
                         if(substr($line, 0, 2) == '--' || $line == '')
                           continue;
                         $templine .= $line;
                         $query = false;
                         if(substr(trim($line), -1, 1) == ';'){
                           $query = mysqli_query($con, $templine);
+                          $query_count++;
+
+                          // Log erro se query falhar
+                          if(!$query && mysqli_error($con)) {
+                            $error_count++;
+                            @file_put_contents('../../storage/logs/installer_debug.log',
+                              date('Y-m-d H:i:s') . " - Query $query_count error (line $line_num): " . mysqli_error($con) . "\n",
+                              FILE_APPEND
+                            );
+                          }
+
                           $templine = '';
+
+                          // Log progresso a cada 100 queries
+                          if($query_count % 100 == 0) {
+                            @file_put_contents('../../storage/logs/installer_debug.log',
+                              date('Y-m-d H:i:s') . " - Progress: $query_count queries executed\n",
+                              FILE_APPEND
+                            );
+                          }
                         }
                       }
 
-                      @file_put_contents('../../storage/logs/installer_debug.log', 
-                        date('Y-m-d H:i:s') . " - SQL import completed\n", 
+                      @file_put_contents('../../storage/logs/installer_debug.log',
+                        date('Y-m-d H:i:s') . " - SQL import completed. Total: $query_count queries, $error_count errors\n",
                         FILE_APPEND
                       );
 
@@ -509,8 +536,8 @@ PAYPAL_LIVE_CLIENT_SECRET=
                       $envato_sql="UPDATE settings SET `envato_buyer_name` = '".$_SESSION['envato_buyer_name']."',`envato_purchase_code` = '".$_SESSION['envato_purchase_code']."'WHERE `id`='1'";
                       mysqli_query($con, $envato_sql);
 
-                      @file_put_contents('../../storage/logs/installer_debug.log', 
-                        date('Y-m-d H:i:s') . " - Settings updated, showing success form\n", 
+                      @file_put_contents('../../storage/logs/installer_debug.log',
+                        date('Y-m-d H:i:s') . " - Settings updated, showing success form\n",
                         FILE_APPEND
                       );
 

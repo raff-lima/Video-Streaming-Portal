@@ -54,10 +54,15 @@ RUN echo "upload_max_filesize = 100M" >> /usr/local/etc/php/conf.d/uploads.ini &
     echo "memory_limit = 512M" >> /usr/local/etc/php/conf.d/uploads.ini && \
     echo "max_execution_time = 600" >> /usr/local/etc/php/conf.d/uploads.ini && \
     echo "max_input_time = 600" >> /usr/local/etc/php/conf.d/uploads.ini && \
-    echo "default_socket_timeout = 600" >> /usr/local/etc/php/conf.d/uploads.ini
+    echo "default_socket_timeout = 600" >> /usr/local/etc/php/conf.d/uploads.ini && \
+    echo "upload_tmp_dir = /tmp" >> /usr/local/etc/php/conf.d/uploads.ini && \
+    echo "file_uploads = On" >> /usr/local/etc/php/conf.d/uploads.ini
 
 # Configurar PHP-FPM
-RUN echo "request_terminate_timeout = 600" >> /usr/local/etc/php-fpm.d/www.conf
+RUN echo "request_terminate_timeout = 600" >> /usr/local/etc/php-fpm.d/www.conf && \
+    echo "request_slowlog_timeout = 0" >> /usr/local/etc/php-fpm.d/www.conf && \
+    echo "php_admin_value[error_log] = /var/log/php-fpm-error.log" >> /usr/local/etc/php-fpm.d/www.conf && \
+    echo "php_admin_flag[log_errors] = on" >> /usr/local/etc/php-fpm.d/www.conf
 
 # Configurar Nginx
 COPY docker/nginx.conf /etc/nginx/nginx.conf
@@ -72,7 +77,10 @@ RUN chmod +x /start.sh
 
 # Criar diretórios necessários
 RUN mkdir -p /var/log/supervisor \
-    && mkdir -p /run/nginx
+    && mkdir -p /run/nginx \
+    && mkdir -p /tmp \
+    && chmod 1777 /tmp \
+    && chown root:root /tmp
 
 # Expor porta 80
 EXPOSE 80

@@ -5,6 +5,12 @@ echo "==================================="
 echo "Video Streaming Portal - Iniciando"
 echo "==================================="
 
+# Garantir permissões corretas no diretório temporário do PHP
+echo "Configurando diretório temporário..."
+mkdir -p /tmp
+chmod 1777 /tmp
+echo "✓ Diretório temporário configurado!"
+
 # Criar arquivo .env se não existir (Coolify injeta vars como ENV, não arquivo)
 if [ ! -f /var/www/html/.env ]; then
     echo "Criando arquivo .env a partir das variáveis de ambiente..."

@@ -1,30 +1,5 @@
 
-<style>
-#viavi_player {
-    margin: auto;
-    width: 100% !important;
-    max-width: 900px !important;
-    position: relative !important;
-    overflow: visible !important;
-}
-#viavi_player * {
-    position: relative !important;
-    overflow: visible !important;
-}
-#viavi_player .fwdevp {
-    width: 100% !important;
-    height: auto !important;
-}
-#viavi_player iframe,
-#viavi_player video {
-    width: 100% !important;
-    height: auto !important;
-    aspect-ratio: 16/9 !important;
-    display: block !important;
-    visibility: visible !important;
-}
-</style>
-<div id="viavi_player"></div>
+<div id="viavi_player" style="margin:auto;"></div>
 
 
 <!-- Setup EVP -->

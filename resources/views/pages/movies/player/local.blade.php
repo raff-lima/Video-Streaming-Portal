@@ -2,7 +2,7 @@
 <style>
 #viavi_player {
     margin: auto;
-    width: 50% !important;
+    width: 55% !important;
     max-width: 1200px !important;
 }
 </style>

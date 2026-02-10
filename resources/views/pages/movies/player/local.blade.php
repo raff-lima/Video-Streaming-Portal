@@ -1,5 +1,12 @@
 
-<div id="viavi_player" style="margin:auto;"></div>
+<style>
+#viavi_player {
+    margin: auto;
+    width: 70% !important;
+    max-width: 1200px !important;
+}
+</style>
+<div id="viavi_player"></div>
 
 
 <!-- Setup EVP -->

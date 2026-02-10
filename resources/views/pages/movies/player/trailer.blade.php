@@ -2,10 +2,13 @@
 <style>
 #viavi_player {
     margin: auto;
-    width: 95% !important;
-    max-width: 1600px !important;
+    width: 100% !important;
+    max-width: 900px !important;
 }
-#viavi_player .fwdevp,
+#viavi_player .fwdevp {
+    width: 100% !important;
+    height: auto !important;
+}
 #viavi_player iframe,
 #viavi_player video {
     width: 100% !important;

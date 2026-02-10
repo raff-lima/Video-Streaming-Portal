@@ -1,21 +1,21 @@
- 
+
 <div id="viavi_player" style="margin:auto;"></div>
- 
+
 
  <!-- Setup EVP -->
  <script type="text/javascript">
 			 FWDEVPUtils.onReady(function(){
- 
+
 				 FWDEVPlayer.videoStartBehaviour = "pause";
-				 
-				 new FWDEVPlayer({		
+
+				 new FWDEVPlayer({
 					 //main settings
 					 instanceName:"player1",
 					 parentId:"viavi_player",
 					 mainFolderPath:"{{URL::asset('/site_assets/player/content/')}}",
 					 initializeOnlyWhenVisible:"no",
 					 skinPath:"{{ get_player_cong('player_style') }}",
-					 displayType:"responsive", 
+					 displayType:"responsive",
 					 autoScale:"yes",
 					 fillEntireVideoScreen:"no",
 					 playsinline:"yes",
@@ -32,7 +32,7 @@
 					 startAtTime:"",
 					 stopAtTime:"",
 					 videoSource:[
-						 {source:"encrypt:{{base64_encode($episode_info->video_url)}}", label:"", isLive:"no"},						  
+						 {source:"encrypt:{{base64_encode($episode_info->video_url)}}", label:"", isLive:"no"},
 					 ],
 					 posterPath:"{{URL::to('/'.$episode_info->video_image)}}",
 					 showErrorInfo:"yes",
@@ -46,8 +46,6 @@
 					 autoPlayText:"Click to Unmute",
 					 loop:"yes",
 					 scrubAtTimeAtFirstPlay:"00:00:00",
-					 maxWidth:1325,
-					 maxHeight:535,
 					 volume:.8,
 					 greenScreenTolerance:200,
 					 backgroundColor:"#000000",
@@ -111,18 +109,18 @@
 					 showSubtitleButton:"yes",
 					 subtitlesOffLabel:"Subtitle off",
 					 startAtSubtitle:1,
-					 subtitlesSource:[						 
-						  
+					 subtitlesSource:[
+
 						 @if($episode_info->subtitle_on_off)
-							 @if($episode_info->subtitle_url1)								
-							 {subtitlePath:"{{$episode_info->subtitle_url1}}", subtileLabel:"{{$episode_info->subtitle_language1?$episode_info->subtitle_language1:'English'}}"}, 
+							 @if($episode_info->subtitle_url1)
+							 {subtitlePath:"{{$episode_info->subtitle_url1}}", subtileLabel:"{{$episode_info->subtitle_language1?$episode_info->subtitle_language1:'English'}}"},
 							 @endif
 							 @if($episode_info->subtitle_url2)
-							 {subtitlePath:"{{$episode_info->subtitle_url2}}", subtileLabel:"{{$episode_info->subtitle_language2?$episode_info->subtitle_language2:'English'}}"}, 		
+							 {subtitlePath:"{{$episode_info->subtitle_url2}}", subtileLabel:"{{$episode_info->subtitle_language2?$episode_info->subtitle_language2:'English'}}"},
 							 @endif
 							 @if($episode_info->subtitle_url3)
-							 {subtitlePath:"{{$episode_info->subtitle_url3}}", subtileLabel:"{{$episode_info->subtitle_language3?$episode_info->subtitle_language3:'English'}}"},							 		
-							 @endif    
+							 {subtitlePath:"{{$episode_info->subtitle_url3}}", subtileLabel:"{{$episode_info->subtitle_language3?$episode_info->subtitle_language3:'English'}}"},
+							 @endif
 						 @endif
 					 ],
 					 //audio visualizer
@@ -156,7 +154,7 @@
 					 openerEqulizerOffsetLeft:3,
 					 offsetX:0,
 					 offsetY:0,
-					  
+
 					 //embed window
 					 embedWindowCloseButtonMargins:15,
 					 borderColor:"#333333",
@@ -191,22 +189,22 @@
 					 contextMenuItemNormalColor:"#bdbdbd",
 					 contextMenuItemSelectedColor:"#FFFFFF",
 					 contextMenuItemDisabledColor:"#333",
-					 useYoutube:"yes", 
-                     useVimeo:"yes", 
-					 
+					 useYoutube:"yes",
+                     useVimeo:"yes",
+
 					 @if(check_user_ad_allow() AND get_player_cong('player_default_ads')=="Custom")
- 
+
 						 //ads
 						 openNewPageAtTheEndOfTheAds:"no",
 						 adsSource:[
 							 @if(get_player_cong('custom_ad1_source')!="")
 							 {source:"{{ get_player_cong('custom_ad1_source') }}", timeStart:"{{get_player_cong('custom_ad1_timestart')}}", timeToHoldAds:5, thumbnailSource:"", link:"{{get_player_cong('custom_ad1_link')}}", target:"_blank"},
 							 @endif
-							 
+
 							 @if(get_player_cong('custom_ad2_source')!="")
 							 {source:"{{ get_player_cong('custom_ad2_source') }}", timeStart:"{{get_player_cong('custom_ad2_timestart')}}", timeToHoldAds:5, thumbnailSource:"", link:"{{get_player_cong('custom_ad2_link')}}", target:"_blank"},
 							 @endif
- 
+
 							 @if(get_player_cong('custom_ad3_source')!="")
 							 {source:"{{ get_player_cong('custom_ad3_source') }}", timeStart:"{{get_player_cong('custom_ad3_timestart')}}", timeToHoldAds:5, thumbnailSource:"", link:"{{get_player_cong('custom_ad3_link')}}", target:"_blank"},
 							 @endif
@@ -218,10 +216,10 @@
 						 adsTextNormalColor:"#999999",
 						 adsTextSelectedColor:"#FFFFFF",
 						 adsBorderNormalColor:"#666666",
-						 adsBorderSelectedColor:"#FFFFFF",	
-						 
+						 adsBorderSelectedColor:"#FFFFFF",
+
 					 @elseif(check_user_ad_allow() AND get_player_cong('player_default_ads')=="Vast")
- 
+
 						 //vast advertisement
 						 @if(get_player_cong('vast_url')!="")
 							 @if(get_player_cong('vast_type')=="Local")
@@ -229,17 +227,17 @@
 							 @else
 							 vastSource:"{{ get_player_cong('vast_url') }}",
 							 @endif
-							 
+
 							 vastLinearStartTime:"00:00:00",
 							 vastClickTroughTarget:"_blank",
 						 @endif
-					 
-					 @else	
+
+					 @else
 						 //No Ad
 					 @endif
-					 
-					 
+
+
 				 });
- 
+
 			 });
 		 </script>

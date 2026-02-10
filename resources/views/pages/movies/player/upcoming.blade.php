@@ -1,21 +1,21 @@
- 
+
 <div id="viavi_player" style="margin:auto;"></div>
- 
+
 
  <!-- Setup EVP -->
  <script type="text/javascript">
 			 FWDEVPUtils.onReady(function(){
- 
+
 				 FWDEVPlayer.videoStartBehaviour = "pause";
-				 
-				 new FWDEVPlayer({		
+
+				 new FWDEVPlayer({
 					 //main settings
 					 instanceName:"player1",
 					 parentId:"viavi_player",
 					 mainFolderPath:"{{URL::asset('/site_assets/player/content/')}}",
 					 initializeOnlyWhenVisible:"no",
 					 skinPath:"{{ get_player_cong('player_style') }}",
-					 displayType:"responsive", 
+					 displayType:"responsive",
 					 autoScale:"yes",
 					 fillEntireVideoScreen:"no",
 					 playsinline:"yes",
@@ -32,7 +32,7 @@
 					 startAtTime:"",
 					 stopAtTime:"",
 					 videoSource:[
-						 {source:"encrypt:{{base64_encode($movies_info->trailer_url)}}", label:"", isLive:"no"},						  
+						 {source:"encrypt:{{base64_encode($movies_info->trailer_url)}}", label:"", isLive:"no"},
 					 ],
 					 posterPath:"{{URL::to('/'.$movies_info->video_image)}}",
 					 showErrorInfo:"yes",
@@ -46,8 +46,6 @@
 					 autoPlayText:"Click to Unmute",
 					 loop:"yes",
 					 scrubAtTimeAtFirstPlay:"00:00:00",
-					 maxWidth:1325,
-					 maxHeight:535,
 					 volume:.8,
 					 greenScreenTolerance:200,
 					 backgroundColor:"#000000",
@@ -111,8 +109,8 @@
 					 showSubtitleButton:"yes",
 					 subtitlesOffLabel:"Subtitle off",
 					 startAtSubtitle:1,
-					 subtitlesSource:[						 
-						   
+					 subtitlesSource:[
+
 					 ],
 					 //audio visualizer
 					 audioVisualizerLinesColor:"#0099FF",
@@ -145,7 +143,7 @@
 					 openerEqulizerOffsetLeft:3,
 					 offsetX:0,
 					 offsetY:0,
-					  
+
 					 //embed window
 					 embedWindowCloseButtonMargins:15,
 					 borderColor:"#333333",
@@ -180,10 +178,10 @@
 					 contextMenuItemNormalColor:"#bdbdbd",
 					 contextMenuItemSelectedColor:"#FFFFFF",
 					 contextMenuItemDisabledColor:"#333",
-					 useYoutube:"yes", 
+					 useYoutube:"yes",
                      useVimeo:"yes",
-					   
+
 				 });
- 
+
 			 });
 		 </script>
